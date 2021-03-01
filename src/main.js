@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from "./router"
 import 'ant-design-vue/dist/antd.css';
+import rootStore from './store/rootStore';
 import Antd from 'ant-design-vue';
 import Unicon from 'vue-unicons'
 import {
@@ -22,11 +23,13 @@ Unicon.add([
   , uniUsersAlt
 ])
 
+
 Vue.config.productionTip = false;
 Vue.use(Unicon)
 Vue.use(Antd)
 
 new Vue({
   render: h => h(App),
-  router
+  router,
+  store: rootStore
 }).$mount('#app')

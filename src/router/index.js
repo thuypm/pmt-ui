@@ -24,6 +24,12 @@ const router = new Router({
       path: '/',
       component: PrivateLayout,
       redirect: "/all-group",
+      beforeEnter: (to, from, next) => {
+        if (localStorage.token)
+          return next()
+        else
+          next('/signin')
+      },
       children:
         [
           //   {
@@ -37,11 +43,11 @@ const router = new Router({
             component: AllGroup
           },
 
-            {
-              path: 'file',
-              name: 'file',
-              component: File
-            },
+          {
+            path: 'file',
+            name: 'file',
+            component: File
+          },
           {
             path: 'notification',
             name: 'notification',
@@ -52,16 +58,16 @@ const router = new Router({
             name: 'group',
             component: Group
           },
-            {
-              path: 'exercise',
-              name: 'exercise',
-              component: Exercise
-            },
-            {
-              path: 'meeting',
-              name: 'meeting',
-              component: Meeting
-            },
+          {
+            path: 'exercise',
+            name: 'exercise',
+            component: Exercise
+          },
+          {
+            path: 'meeting',
+            name: 'meeting',
+            component: Meeting
+          },
           //   {
           //     path: 'exStudent/:id',
           //     name: 'Exercise',

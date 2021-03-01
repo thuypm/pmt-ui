@@ -30,7 +30,7 @@ export default {
     Header,
   },
   created() {
-    console.log(this.$route);
+    // console.log(this.$route);
   },
   data() {
     return {

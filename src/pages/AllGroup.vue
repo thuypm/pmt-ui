@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import EditGroup from "../components/Modal/EditGroup.vue";
 import GroupCard from "./AllGroup/GroupCard.vue";
 import JoinGroup from "./AllGroup/JoinGroup.vue";
@@ -28,6 +29,11 @@ export default {
   data() {
     return {};
   },
+  computed:{
+    ...mapState({
+      
+    })
+ },
   methods: {},
 };
 </script>

@@ -56,7 +56,7 @@
                   class="list-user-result-item"
                   @close="() => handleDelete()"
                 >
-                  <a-avatar icon="user" /> {{ member }}
+                  <a-avatar icon="user" /> {{ member.username }}
                   <a-icon
                     style="color: green; float: right; margin-top: 6px"
                     type="plus"
@@ -121,7 +121,7 @@ export default {
     findUser({ target: { value } }) {
       if (timeout) clearTimeout(timeout);
       timeout = setTimeout(() => {
-        this.$store.dispatch("group/findUser", value);
+        this.$store.dispatch("group/findUser", {username: value});
       }, 700);
     },
     handleDelete() {},

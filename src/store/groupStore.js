@@ -1,13 +1,14 @@
-import { postRequest } from "../services/api";
+import { postRequest, getRequest } from "../services/api";
 import router from '../router/index'
+
 
 export default {
     namespaced: true,
     state: {
         visibleModal: true,
-        listSearchResultUser: ['thuypm','thuypm','thuypm','fhsao'],
+        listSearchResultUser: [],
         errorList: [],
-        formData:{
+        formData: {
             title: 'vip',
             description: 'abc',
             members: [],
@@ -18,19 +19,29 @@ export default {
         setVisibleModal(state, value) {
             state.visibleModal = value;
         },
-        setLoading(state, value){
+        setLoading(state, value) {
             state.loading = value
+        },
+        setlistSearchResultUser(state, value) {
+            state.listSearchResultUser = value
         }
     },
     actions: {
         async findUser({ commit, }, data) {
-            let response = await getRequest('user/findUser', data).catch(err => {
-                commit('setLoading', false)
-            })
-            if (response) { 
-                commit('setLoading', false);
-                commit(listSearchResultUser, data);
+            if (data?.username.trim().length) {
+                let response = await getRequest('user/find-user', data).catch(err => {
+                    commit('setLoading', false)
+                })
+                if (response) {
+                    commit('setLoading', false);
+                    commit('setlistSearchResultUser', response);
+                }
             }
+            else
+            {
+                commit('setlistSearchResultUser', []);
+            }
+
         },
         async signup({ commit, }, data) {
             commit('setLoading', true)

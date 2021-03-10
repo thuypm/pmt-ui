@@ -1,18 +1,24 @@
 <template>
   <div>
-    <a-modal
-      :visible="visibleModal"
-      :title="formData.title"
-      @ok="handleOk"
-      @cancel="handleClose"
-    >
-      <a-form>
+    <a-modal :visible="visibleModal" :title="formData.title" @cancel="handleClose">
+      <template slot="footer">
+        <a-button key="back" @click="handleClose"> Hủy </a-button>
+        <a-button
+          key="submit"
+          type="primary"
+          :loading="loading"
+          @click="handleOk"
+        >
+          Xác nhận
+        </a-button>
+      </template>
+      <a-form :form="form">
         <a-form-item label="Tên nhóm">
           <a-input
             v-decorator="[
               'name',
               {
-                rules: [{ required: true, message: 'Username is required!' }],
+                rules: [{ required: true, message: 'Hãy nhập tên nhóm' }],
               },
             ]"
             aria-placeholder="vip"
@@ -21,15 +27,15 @@
         <a-form-item label="Mô tả">
           <a-textarea
             v-decorator="[
-              'descripttion',
+              'description',
               {
-                rules: [{ required: true, message: 'Username is required!' }],
+                rules: [{ required: true, message: 'Hãy nhập mô tả của nhóm' }],
               },
             ]"
           ></a-textarea>
         </a-form-item>
         <a-form-item label="Thành viên">
-          <a-tag class="list-member-item" @close="() => handleDelete()">
+          <a-tag class="list-member-item">
             <a-icon style="color: green" type="check-circle" /> Bạn(Chủ sở hữu)
           </a-tag>
           <a-tag
@@ -37,9 +43,9 @@
             :key="index"
             class="list-member-item"
             :closable="true"
-            @close="() => handleDelete()"
+            @close="() => handleAddOrRemoveUser(member)"
           >
-            {{ member }}
+            {{ member.username }}
           </a-tag>
         </a-form-item>
         <a-form-item label="Thêm thành viên">
@@ -54,12 +60,13 @@
                   v-for="(member, index) in listSearchResultUser"
                   :key="index"
                   class="list-user-result-item"
-                  @close="() => handleDelete()"
+                  @click="() => handleAddOrRemoveUser(member, index)"
                 >
                   <a-avatar icon="user" /> {{ member.username }}
                   <a-icon
+                    v-if="member.checked"
                     style="color: green; float: right; margin-top: 6px"
-                    type="plus"
+                    type="check"
                   />
                 </div>
               </div>
@@ -75,7 +82,7 @@
   </div>
 </template>
 <script>
-import { mapMutations, mapState } from "vuex";
+import { mapState } from "vuex";
 let timeout;
 export default {
   data() {
@@ -85,15 +92,16 @@ export default {
   },
   computed: {
     ...mapState({
+      loading: (state) => state.group.loading,
       visibleModal: (state) => state.group.visibleModal,
       formData: (state) => state.group.formData,
       listSearchResultUser: (state) => state.group.listSearchResultUser,
     }),
   },
   watch: {
-    formData(value) {
-      this.form.setFieldsValue(...value);
-    },
+    // formData(value) {
+    //   this.form.setFieldsValue(...value);
+    // },
   },
   created() {
     this.form = this.$form.createForm(this, {
@@ -102,30 +110,38 @@ export default {
       },
       mapPropsToFields: () => {
         return {
-          username: this.$form.createFormField({
-            name: this.name,
+          name: this.$form.createFormField({
+            value: this.$store.state.group?.formData?.name,
+          }),
+          description: this.$form.createFormField({
+            value: this.$store.state.group?.formData?.description,
           }),
         };
       },
       onValuesChange: (_, values) => {
-        console.log(values);
-        // Synchronize to vuex store in real time
-        // this.$store.commit('update', values)
+        this.$store.commit("group/setFormField", values);
       },
     });
   },
   methods: {
+    handleAddOrRemoveUser(member, index) {
+      if (!member?.checked)
+        this.$store.commit("group/addUser", { member, index });
+      else this.$store.commit("group/removeUser", { member });
+    },
     handleClose() {
+      this.$store.commit("group/setFormData", {});
       this.$store.commit("group/setVisibleModal", false);
     },
     findUser({ target: { value } }) {
       if (timeout) clearTimeout(timeout);
       timeout = setTimeout(() => {
-        this.$store.dispatch("group/findUser", {username: value});
+        if (value) this.$store.dispatch("group/findUser", { username: value });
       }, 700);
     },
-    handleDelete() {},
-    handleOk(e) {},
+    handleOk(e) {
+      this.$store.dispatch("group/submit");
+    },
   },
 };
 </script>

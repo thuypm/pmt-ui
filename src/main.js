@@ -12,6 +12,7 @@ import {
   uniComments, uniUsersAlt, uniPhone,
   uniCommentsAlt, uniCornerUpLeftAlt
 } from 'vue-unicons/src/icons'
+import Noti from './utils/Noti';
 
 Unicon.add([
   uniVideo, uniVideoSlash,
@@ -27,6 +28,7 @@ Unicon.add([
 Vue.config.productionTip = false;
 Vue.use(Unicon)
 Vue.use(Antd)
+Vue.prototype.$noti = new Noti(rootStore, Vue.prototype.$notification)
 
 new Vue({
   render: h => h(App),

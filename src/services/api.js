@@ -21,7 +21,7 @@ export  function generateHeader() {
     };
     return headers
 }
-export async function getRequest(url, params) {
+export  function getRequest(url, params) {
     return new Promise((resolve, reject) => {
         axios.get(process.env.VUE_APP_HOST_API + url, {
             params: params,
@@ -37,7 +37,7 @@ export async function getRequest(url, params) {
         })
     })
 }
-export async function postRequest(url, params,) {
+export  function postRequest(url, params,) {
     return new Promise((resolve, reject) => {
         axios.post(process.env.VUE_APP_HOST_API + url, params, { headers: generateHeader() }).then((response) => {
             resolve(response.data);

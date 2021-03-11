@@ -3,16 +3,7 @@
   <div>
     <chat-meeting />
     <div class="post-header">
-      <div class="title">
-        Bài đăng
-        <!-- <a-tabs default-active-key="1" @change="callback">
-          <a-tab-pane key="1" tab="Tab 1"> Content of Tab Pane 1 </a-tab-pane>
-          <a-tab-pane key="2" tab="Tab 2" force-render>
-            Content of Tab Pane 2
-          </a-tab-pane>
-          <a-tab-pane key="3" tab="Tab 3"> Content of Tab Pane 3 </a-tab-pane>
-        </a-tabs> -->
-      </div>
+      <div class="title">Bài đăng</div>
       <div class="">
         <a-button type="primary" icon="video-camera">Tham gia</a-button>
         <span> <a-icon class="action-post-icon setting" type="setting" /></span>
@@ -27,32 +18,7 @@
         :data-source="listData"
       >
         <a-list-item slot="renderItem" key="item.title" slot-scope="item">
-          <div class="post-pane flex">
-            <div class="avatar">
-              <a-avatar size="large" slot="avatar" :src="item.avatar" />
-            </div>
-            <div class="post-content">
-              <p class="user-name">{{ item.title }}</p>
-              <p>{{ item.content }}</p>
-              <a-list :data-source="listData">
-                <a-list-item
-                  :class="'comment-li'"
-                  slot="renderItem"
-                  slot-scope="item"
-                >
-                  <div class="flex">
-                    <div class="avatar">
-                      <a-avatar size="small" slot="avatar" :src="item.avatar" />
-                    </div>
-                    <div>
-                      <p class="user-name">{{ item.title }}</p>
-                      <p>{{ item.content }}</p>
-                    </div>
-                  </div>
-                </a-list-item>
-              </a-list>
-            </div>
-          </div>
+          <post-item :item="item" :listData="listData" />
           <div class="list-item-footer">
             <span>
               <input placeholder="Nhập câu trả lời" />
@@ -67,7 +33,7 @@
       </a-list>
     </div>
     <div class="post-form">
-      <textarea  placeholder="Tạo bài viết mới" />
+      <textarea placeholder="Tạo bài viết mới" />
       <div class="post-form-action">
         <span style="float: right">
           <a-icon class="action-post-icon" type="right-square"> </a-icon>
@@ -90,6 +56,7 @@
   </div>
 </template>
 <script>
+import PostItem from "./Group/PostItem.vue";
 import ChatMeeting from "./Meeting/ChatMeeting.vue";
 const listData = [];
 for (let i = 0; i < 4; i++) {
@@ -105,7 +72,7 @@ for (let i = 0; i < 4; i++) {
 }
 
 export default {
-  components: { ChatMeeting },
+  components: { ChatMeeting, PostItem },
   data() {
     return {
       listData,
@@ -117,6 +84,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .setting {
   margin-left: 20px;
@@ -145,11 +113,7 @@ export default {
 p {
   margin-bottom: 2px;
 }
-.comment-li {
-  font-size: 14px;
-  border: 0 !important;
-  padding: 0 !important;
-}
+
 input,
 textarea {
   position: relative;
@@ -171,26 +135,13 @@ textarea {
   border-width: 0;
   box-shadow: none;
 }
-.user-name {
-  font-weight: 500;
-}
-.post-content {
-  background: #fff;
-  padding: 8px 16px 8px 16px;
-  width: 100%;
-  border-radius: 3px 3px 0 0;
-  box-shadow: 0px 2px 1px -2px rgba(0, 0, 0, 0.65);
-}
 .flex {
   display: flex;
-}
-.avatar {
-  margin-right: 8px;
 }
 .list-post {
   height: 100vh;
   overflow-y: auto;
-  padding: 20px 36px 10px 20px;
+  padding: 50px 36px 100px 20px;
   width: calc(100% - 300px);
 }
 </style>

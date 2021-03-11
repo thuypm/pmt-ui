@@ -1,6 +1,12 @@
 import { postRequest, getRequest } from "../services/api";
 import router from '../router/index'
 
+const defaultData = {
+    name: '',
+    description: '',
+    members: [],
+    owner: ''
+}
 
 export default {
     namespaced: true,
@@ -11,9 +17,15 @@ export default {
         listSearchResultUser: [],
         listGroup: [],
         errorList: [],
+        selectedItem: {
+            name: '',
+            description: '',
+            members: [],
+            owner: ''
+        },
         formData: {
-            name: 'vip',
-            description: 'abc',
+            name: '',
+            description: '',
             members: [],
             owner: ''
         }
@@ -29,7 +41,16 @@ export default {
             state.loading = value
         },
         setFormData(state, value) {
-            state.formData = value
+            state.formData = {
+                ...state.formData,
+                ...value
+            }
+        },
+        setItemData(state, value) {
+            state.selectedItem = {
+                ...state.selectedItem,
+                ...value
+            };
         },
         setListGroup(state, value) {
             state.listGroup = value;
@@ -55,16 +76,19 @@ export default {
         }
     },
     actions: {
-        async fetchOneGroupForEdit({ commit, state }, id){
-            let response = await getRequest('group/'+ id).catch(err => {
+        resetForm ({commit}){
+            commit('setFormData', defaultData);
+            commit('setItemData', defaultData);
+            commit('setlistSearchResultUser', [])
+        },
+        async fetchOneGroupForEdit({ commit, state }, id) {
+            let response = await getRequest('group/' + id).catch(err => {
                 commit('setSpinning', false);
-            })  
-            if(response)
-            {
-                console.log(response);
+            })
+            if (response) {
                 commit('setSpinning', false);
                 commit('setFormData', response);
-                commit('setVisibleModal', true);
+                commit('setItemData', response);
             }
         },
         async fetchAllGroup({ commit, state }) {

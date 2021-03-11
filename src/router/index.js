@@ -9,8 +9,9 @@ import Group from '@/pages/Group';
 import Signup from '@/pages/Signup'
 import File from '@/pages/File'
 import Meeting from '@/pages/Meeting'
-
 import Exercise from '@/pages/Exercise'
+
+import Error404 from '@/pages/Error404'
 // import ExStudent from '@/pages/container/ExStudent'
 // import ExAdmin from '@/pages/container/ExAdmin'
 // import Error from '@/pages/container/Error'
@@ -54,7 +55,7 @@ const router = new Router({
             component: Notice
           },
           {
-            path: 'group',
+            path: 'group/:id',
             name: 'group',
             component: Group
           },
@@ -64,7 +65,7 @@ const router = new Router({
             component: Exercise
           },
           {
-            path: 'meeting',
+            path: 'meeting/:id',
             name: 'meeting',
             component: Meeting
           },
@@ -91,11 +92,11 @@ const router = new Router({
       name: 'signup',
       component: Signup
     },
-    // {
-    //   path: '*',
-    //   name: 'error',
-    //   component: Error
-    // },
+    {
+      path: '*',
+      name: 'error',
+      component: Error404
+    },
   ],
 
 })

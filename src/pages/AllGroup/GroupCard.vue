@@ -7,7 +7,7 @@
     />
     <template slot="actions" class="ant-card-actions">
       <a-icon key="edit" type="edit" @click="editGroup" />
-      <a-icon type="forward" />
+      <a-icon type="forward" @click="gotoMeeting"/>
       <a-icon key="setting" type="setting" />
     </template>
     <a-card-meta :title="group.name" style="text-align: center"> </a-card-meta>
@@ -20,7 +20,11 @@ export default {
   methods:{
     editGroup()
     {
-      this.$store.dispatch('group/fetchOneGroupForEdit', this.group?._id)
+      this.$store.dispatch('group/fetchOneGroupForEdit', this.group?._id);
+      this.$store.commit('group/setVisibleModal', true);
+    },
+    gotoMeeting(){
+      this.$router.push("group/" + this.group._id)
     }
   }
 };

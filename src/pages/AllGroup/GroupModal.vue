@@ -1,6 +1,10 @@
 <template>
   <div>
-    <a-modal :visible="visibleModal" :title="formData.title" @cancel="handleClose">
+    <a-modal
+      :visible="visibleModal"
+      :title="formData.title"
+      @cancel="handleClose"
+    >
       <template slot="footer">
         <a-button key="back" @click="handleClose"> Hủy </a-button>
         <a-button
@@ -19,6 +23,7 @@
               'name',
               {
                 rules: [{ required: true, message: 'Hãy nhập tên nhóm' }],
+                initialValue: formData.name
               },
             ]"
             aria-placeholder="vip"
@@ -30,6 +35,7 @@
               'description',
               {
                 rules: [{ required: true, message: 'Hãy nhập mô tả của nhóm' }],
+                 initialValue: formData.description
               },
             ]"
           ></a-textarea>
@@ -43,7 +49,7 @@
             :key="index"
             class="list-member-item"
             :closable="true"
-            @close="() => handleAddOrRemoveUser(member)"
+            @close="() => handleRemoveUser(member)"
           >
             {{ member.username }}
           </a-tag>
@@ -72,7 +78,7 @@
               </div>
             </template>
             <a-input
-              aria-placeholder="Thêm thành viên"
+              aria-placeholder="Thêm thành viên"  
               @change="findUser"
             ></a-input>
           </a-popover>
@@ -88,6 +94,7 @@ export default {
   data() {
     return {
       visible: false,
+      form: null,
     };
   },
   computed: {
@@ -95,26 +102,27 @@ export default {
       loading: (state) => state.group.loading,
       visibleModal: (state) => state.group.visibleModal,
       formData: (state) => state.group.formData,
+      selectedItem: (state) => state.group.selectedItem,
       listSearchResultUser: (state) => state.group.listSearchResultUser,
     }),
   },
   watch: {
-    // formData(value) {
-    //   this.form.setFieldsValue(...value);
-    // },
+    selectedItem(value) {
+        this.form.setFieldsValue({
+          name: value.name,
+          description: value.description,
+        });
+    },
   },
   created() {
     this.form = this.$form.createForm(this, {
-      onFieldsChange: (_, changedFields) => {
-        this.$emit("change", changedFields);
-      },
       mapPropsToFields: () => {
         return {
           name: this.$form.createFormField({
-            value: this.$store.state.group?.formData?.name,
+            value: this.formData?.name,
           }),
           description: this.$form.createFormField({
-            value: this.$store.state.group?.formData?.description,
+            value: this.formData?.description,
           }),
         };
       },
@@ -124,14 +132,17 @@ export default {
     });
   },
   methods: {
+    handleRemoveUser(member, index){
+      this.$store.commit("group/removeUser", { member });
+    },
     handleAddOrRemoveUser(member, index) {
       if (!member?.checked)
         this.$store.commit("group/addUser", { member, index });
       else this.$store.commit("group/removeUser", { member });
     },
     handleClose() {
-      this.$store.commit("group/setFormData", {});
       this.$store.commit("group/setVisibleModal", false);
+       this.$store.dispatch("group/resetForm", false);
     },
     findUser({ target: { value } }) {
       if (timeout) clearTimeout(timeout);
@@ -140,7 +151,11 @@ export default {
       }, 700);
     },
     handleOk(e) {
-      this.$store.dispatch("group/submit");
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          this.$store.dispatch("group/submit");
+        }
+      });
     },
   },
 };

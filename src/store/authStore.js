@@ -11,7 +11,7 @@ export default {
         setErrorList(state, value) {
             state.errorList = value;
         },
-        setLoading(state, value){
+        setLoading(state, value) {
             state.loading = value
         }
     },
@@ -23,7 +23,8 @@ export default {
                 commit('setLoading', false)
             })
             if (response) {
-                localStorage.token = response.data.accessToken;   
+                localStorage.setItem("token", response.data.accessToken);
+                localStorage.setItem("username", response.data.username);
                 commit('setLoading', false);
                 commit('setErrorList', []);
                 router.replace('/')

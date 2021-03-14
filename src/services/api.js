@@ -11,6 +11,11 @@ async function handleError(err) {
 
             break;
         }
+        case HTTP_CODE_RESPONSE.UNAUTHENTICATE: {
+            localStorage.clear();
+            window.location.href = '/'
+            break;
+        }
     }
 }
 export  function generateHeader() {

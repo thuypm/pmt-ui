@@ -1,112 +1,171 @@
 <template>
-  <div class="chat-body">
-    <div class="receive-message">
-      <div class="msg">
-        <a-avatar
-          class="receive-avatar"
-          src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-        />
-        <div class="msg-receive-container">
-          <div class="msg-content">
-            abcxyz /* position: absolute; */ /* position: absolute; */ /*
-            position: absolute; */
+  <div class="chat-body" id="message-box-list">
+    <a-skeleton active v-if="spinning" />
+    <div v-else v-for="(message, index) in listMessage" :key="index">
+      <div v-if="message.sender !== username" class="msg-pane receive-message">
+        <div class="msg">
+          <a-avatar
+            class="receive-avatar"
+            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+          />
+          <div class="msg-receive-container">
+            <div v-if="message.type == 'data:image'" class="msg-content">
+              <a
+                :href="hostResoucre + message.content.split(':')[0]"
+                target="_blank"
+              >
+                <img
+                  :src="hostResoucre + message.content.split(':')[0]"
+                  style="max-width: 160px"
+                  alt
+                />
+              </a>
+            </div>
+            <div v-else class="msg-content">
+              <a
+                :href="hostResoucre + message.content.split(':')[0]"
+                v-if="message.type != 'text'"
+                target="_blank"
+              >
+                <a-icon type="file"></a-icon>
+                {{ message.content.split(":")[1] | trimNameFile() }}
+              </a>
+              <p v-else>
+                {{ message.content }}
+              </p>
+            </div>
+            <div class="msg-time msg-receive-time">
+              {{ message.time | shortTime }}
+            </div>
           </div>
-          <div class="msg-time msg-receive-time">4:20</div>
         </div>
       </div>
-    </div>
-     <div class="send-message">
-      <div class="msg">
-        <a-avatar
-          class="send-avatar"
-          src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-        />
-        <div class="msg-send-container">
-          <div class="msg-content">
-            abcxyz /* position: absolute; */ /* position: absolute; */ /*
-            position: absolute; */
+      <div v-else class="msg-pane">
+        <div class="msg send-message">
+          <div class="msg-send-container">
+            <div v-if="message.type == 'data:image'" class="msg-content">
+              <a
+                :href="hostResoucre + message.content.split(':')[0]"
+                target="_blank"
+              >
+                <img
+                  :src="hostResoucre + message.content.split(':')[0]"
+                  style="max-width: 160px"
+                  alt
+                />
+              </a>
+            </div>
+            <div v-else class="msg-content">
+              <a
+                :href="hostResoucre + message.content.split(':')[0]"
+                v-if="message.type != 'text'"
+                target="_blank"
+              >
+                <a-icon type="file"></a-icon>
+                {{ message.content.split(":")[1] | trimNameFile() }}
+              </a>
+              <p v-else>
+                {{ message.content }}
+              </p>
+            </div>
+            <div class="msg-time msg-send-time">
+              {{ message.time | shortTime }}
+            </div>
           </div>
-          <div class="msg-time msg-send-time">4:20</div>
-        </div>
-      </div>
-    </div>
-    <div class="receive-message">
-      <div class="msg">
-        <a-avatar
-          class="receive-avatar"
-          src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-        />
-        <div class="msg-receive-container">
-          <div class="msg-receive-content">abcxyz</div>
-          <div class="msg-time">4:20</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="send-message">
-      <div class="msg">
-        <a-avatar
-          class="send-avatar"
-          src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-        />
-        <div class="msg-send-container">
-          <div class="msg-content">
-            abcxyz /* position: absolute; */ /* position: absolute; */ /*
-            position: absolute; */
-          </div>
-          <div class="msg-time msg-send-time">4:20</div>
+          <a-avatar
+            class="send-avatar"
+            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+          />
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-export default {};
+import moment from "moment";
+import { TIME_FORMAT } from "../../../utils/constants";
+import { trimNameFile } from "../../../utils/filters";
+
+export default {
+  props: ["chatSocket", "username"],
+  data() {
+    return {
+      hostResoucre: process.env.VUE_APP_HOST_RESOURCE,
+      listMessage: [],
+      page: 0,
+      spinning: true
+    };
+  },
+  filters: {
+    shortTime: (value) => {
+      return moment(value).format(TIME_FORMAT.SHORT_FULL_TIME);
+    },
+    trimNameFile: trimNameFile,
+  },
+  created() {
+    this.chatSocket.on("load-all-message", (data) => {
+      // this.listMessage = data;
+      var messageBox = document.getElementById("message-box-list");
+      var tmp = messageBox.scrollHeight;
+      if (data.length) {
+        this.listMessage = data.concat(this.listMessage);
+        this.spinning = false
+        if (this.page == 0)
+          this.$nextTick(function () {
+            messageBox.scrollTop = messageBox.scrollHeight;
+          });
+        else
+          this.$nextTick(function () {
+            messageBox.scrollTop = messageBox.scrollHeight - tmp;
+          });
+      }
+    });
+    this.chatSocket.on("receive-message", (data) => {
+      let len = this.listMessage.length;
+      this.listMessage.push(data);
+      if (len > 20) this.listMessage.unshift();
+    });
+  },
+  methods: {},
+};
 </script>
 <style  scoped>
 .chat-body {
-  overflow-y: scroll; 
+  overflow-y: scroll;
 }
-.send-message {
-  padding: 5px;
+.msg-pane {
+  padding: 8px 8px;
 }
-.msg-send-container {
-  display: inline-block;
-  position: relative;
-  padding: 5px 10px 5px 10px;
-  border-radius: 5px;
-  background: #e5e5f1;
-  /* left: 32px; */
-  top: 0px;
+.msg {
+  display: flex;
 }
-.msg-send-time{
-    float: right;
-}
-.send-avatar {
-  /* position: absolute; */
-  float: right;
-}
-
-.receive-message {
-  position: static;
-  padding: 5px;
-}
-.msg-receive-container {
-  display: inline-block;
-  position: relative;
-  padding: 5px 10px 5px 10px;
-  border-radius: 5px;
-  background: #fff;
-  top: 0px;
-}
-.receive-avatar {
-  /* position: absolute; */
-  float: left;
+.ant-avatar {
+  width: 32px;
+  height: 32px;
 }
 .msg-content {
   max-width: 220px;
 }
+.msg-content > p {
+  margin: 0;
+}
 .msg-time {
   font-size: 10px;
+}
+.msg-receive-container {
+  padding: 5px 10px 5px 10px;
+  border-radius: 5px;
+  background: #fff;
+}
+.msg-send-time {
+  float: right;
+}
+.msg-send-container {
+  padding: 5px 10px 5px 10px;
+  border-radius: 5px;
+  background: #e5e5f1;
+}
+.send-message {
+  justify-content: flex-end;
 }
 </style>

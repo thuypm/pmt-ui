@@ -8,7 +8,7 @@
         <p>{{ item.content }}</p>
         <a-list :data-source="listData">
           <a-list-item
-            :class="'comment-li'"
+            class="comment-li"
             slot="renderItem"
             slot-scope="item"
           >

@@ -1,42 +1,54 @@
   <template>
   <div class="chat-bar">
-    <chat-body class="chat-body" />
-    <chat-footer  class="chat-footer"/>
-    <!-- <a-card-meta title="Card title" description="This is the description">
-        <a-avatar
-          slot="avatar"
-          src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-        />
-      </a-card-meta> -->
+    <chat-body
+      :chatSocket="chatSocket"
+      :roomId="roomId"
+      :username="username"
+      class="chat-body"
+    />
+    <chat-footer
+      :chatSocket="chatSocket"
+      :roomId="roomId"
+      :username="username"
+      class="chat-footer"
+    />
   </div>
 </template> 
   <script>
 import ChatBody from "./ChatComponent/ChatBody.vue";
 import ChatFooter from "./ChatComponent/ChatFooter.vue";
+import io from "socket.io-client";
 
+var socket = io.connect(process.env.VUE_APP_HOST_WS_CHAT);
 export default {
+  props: ["roomId"],
   components: { ChatFooter, ChatBody },
+  data() {
+    return {
+      chatSocket: socket,
+      username: localStorage.username,
+    };
+  },
+  created() {
+    this.chatSocket.emit("join-room", this.roomId);
+  },
 };
 </script>
   <style >
-/* .chat-body {
-  height: 100vh;
-} */
 .chat-bar {
-  /* background: #fff; */
+  width: 300px;
   float: right;
   height: 100%;
-    transition: width 1s;
+  transition: width 1s;
 }
-.chat-body{
-
-  height: calc(100vh - 96px  );
-  height: -webkit-calc(100vh - 96px  );
-  height: -moz-calc(100vh - 96px  );
-  height: -o-calc(100vh - 96px  );
-  height: expression(100vh - 96px  );
+.chat-body {
+  height: calc(100vh - 96px);
+  height: -webkit-calc(100vh - 96px);
+  height: -moz-calc(100vh - 96px);
+  height: -o-calc(100vh - 96px);
+  height: expression(100vh - 96px);
 }
-.chat-footer{
+.chat-footer {
   height: 96px;
 }
 .chat-meeting {

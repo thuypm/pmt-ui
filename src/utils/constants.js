@@ -16,3 +16,6 @@ export const HTTP_CODE_RESPONSE = {
     NOT_FOUND: 404,
     ERROR: 500,
   };
+  export const TIME_FORMAT={
+      SHORT_FULL_TIME: "HH:mm, DD,MMM,yyyy" 
+  }

@@ -26,8 +26,8 @@ const router = new Router({
       component: PrivateLayout,
       redirect: "/all-group",
       beforeEnter: (to, from, next) => {
-        if (localStorage.token)
-          return next()
+        if (localStorage.token && localStorage.username)
+          return next();
         else
           next('/signin')
       },

@@ -1,11 +1,11 @@
  
 <template>
   <div>
-    <chat-meeting />
+    <chat-meeting :roomId="roomId"/>
     <div class="post-header">
       <div class="title">Bài đăng</div>
       <div class="">
-        <a-button type="primary" icon="video-camera">Tham gia</a-button>
+        <a-button type="primary" icon="video-camera" @click="goToMeetingPage">Tham gia</a-button>
         <span> <a-icon class="action-post-icon setting" type="setting" /></span>
       </div>
     </div>
@@ -76,12 +76,19 @@ export default {
   data() {
     return {
       listData,
+      roomId: this.$route.params.id,
       loading: false,
       loadingMore: false,
       showLoadingMore: true,
       actions: [{ type: "check", text: "Đã đọc" }],
     };
   },
+  methods:{
+    goToMeetingPage()
+    {
+      this.$router.push('/meeting/'+ this.roomId)
+    }
+  }
 };
 </script>
 

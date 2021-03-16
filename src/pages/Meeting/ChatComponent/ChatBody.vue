@@ -104,7 +104,6 @@ export default {
   },
   created() {
     this.chatSocket.on("load-all-message", (data) => {
-      // this.listMessage = data;
       var messageBox = document.getElementById("message-box-list");
       var tmp = messageBox.scrollHeight;
       if (data.length) {

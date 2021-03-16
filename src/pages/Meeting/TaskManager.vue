@@ -3,7 +3,7 @@
     <div>
       <a-radio-group size="large">
          <a-radio-button value="time" disabled>
-          <unicon>29:12</unicon>
+          <span>29:12</span>
         </a-radio-button>
         <a-radio-button value="video">
           <unicon name="video" fill="rgba(0, 0, 0, 0.65)"></unicon>

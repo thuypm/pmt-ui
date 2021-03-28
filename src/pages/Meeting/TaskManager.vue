@@ -1,53 +1,105 @@
 <template>
-  <div class="task-manager">
-    <div>
-      <a-radio-group size="large">
-         <a-radio-button value="time" disabled>
-          <span>29:12</span>
-        </a-radio-button>
-        <a-radio-button value="video">
-          <unicon name="video" fill="rgba(0, 0, 0, 0.65)"></unicon>
-        </a-radio-button>
-        <a-radio-button value="microphone">
-          <unicon name="microphone" fill="rgba(0, 0, 0, 0.65)"></unicon>
-        </a-radio-button>
-        <a-radio-button value="desktop">
-          <unicon name="desktop" fill="rgba(0, 0, 0, 0.65)"></unicon>
-        </a-radio-button>
-        <a-radio-button value="comments" @click="(e)=> $emit('show-right-tab','CHAT_TAB')">
-          <unicon name="comments-alt" fill="rgba(0, 0, 0, 0.65)"></unicon>
-        </a-radio-button>
-        <a-radio-button value="users" @click="(e)=> $emit('show-right-tab','LIST_USER')">
-          <unicon name="users-alt" fill="rgba(0, 0, 0, 0.65)"></unicon>
-        </a-radio-button>
-        <a-radio-button value="phone" style="background: red">
-          <unicon name="phone" fill="rgba(0, 0, 0, 0.65)"></unicon>
-        </a-radio-button>
-      </a-radio-group>
+  <div class="task-manager" :style="{ right: activeTab ? '150px' : '0' }">
+    <div class="meeting-function-button">
+      <unicon name="video" fill="rgba(0, 0, 0, 0.65)"></unicon>
+    </div>
+    <div
+      :class="{
+        'meeting-function-button': true,
+        active: camera,
+      }"
+      @click="() => turnOnDevice()"
+    >
+      <unicon
+        :name="camera ? 'video' : 'video-slash'"
+        fill="rgba(0, 0, 0, 0.65)"
+      ></unicon>
+    </div>
+    <div
+      :class="{
+        'meeting-function-button': true,
+        active: camera,
+      }"
+    >
+      <unicon
+        :name="microphone ? 'microphone' : 'microphone-slash'"
+        fill="rgba(0, 0, 0, 0.65)"
+      ></unicon>
+    </div>
+    <div class="meeting-function-button">
+      <unicon name="desktop" fill="rgba(0, 0, 0, 0.65)"></unicon>
+    </div>
+    <div
+      :class="{
+        'meeting-function-button': true,
+        active: activeTab === 'CHAT_TAB',
+      }"
+      @click="(e) => changeCurrentTab('CHAT_TAB')"
+    >
+      <unicon name="comments-alt" fill="rgba(0, 0, 0, 0.65)"></unicon>
+    </div>
+    <div
+      :class="{
+        'meeting-function-button': true,
+        active: activeTab === 'LIST_USER',
+      }"
+      @click="(e) => changeCurrentTab('LIST_USER')"
+    >
+      <unicon name="users-alt" fill="rgba(0, 0, 0, 0.65)"></unicon>
+    </div>
+    <div class="meeting-function-button" style="background: red">
+      <unicon name="phone" fill="white"></unicon>
     </div>
     <div></div>
   </div>
 </template>
 <script>
 export default {
-
+  data() {
+    return {
+      activeTab: null,
+      camera: false,
+      microphone: false,
+    };
+  },
+  methods: {
+    turnOnDevice() {
+      this.$store.commit("meeting/setMediaDevice", {
+        camera: true,
+        micro: false,
+      });
+    },
+    changeCurrentTab(tab) {
+      if (this.activeTab === tab) this.activeTab = null;
+      else this.activeTab = tab;
+      this.$emit("show-right-tab", tab);
+    },
+  },
 };
 </script>
 <style scoped>
-.ant-radio-button-wrapper {
-  height: 100% !important;
+.meeting-function-button {
+  background: #fff;
+  padding: 6px 24px;
+  /* font-size: 16px; */
 }
-.unicon {
-  padding: 10px 10px 5px 10px;
+.active {
+  background: #ccc;
 }
+.meeting-function-button:hover {
+  cursor: pointer;
+  background: #ccc;
+}
+
 .task-manager {
   font-size: 25px;
   display: flex;
   justify-content: center;
   width: 100%;
   position: absolute;
-  top: calc(100vh - 170px - 66px);
-  right: 150px;
+  bottom: 200px;
+  /* top: calc(100vh - 170px - 66px); */
+  /* right: 150px; */
   z-index: 15;
 }
 </style>

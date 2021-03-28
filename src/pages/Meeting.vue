@@ -4,14 +4,21 @@
       :class="[tab == 'CHAT_TAB' ? 'chat-meeting' : 'chat-meeting-hide']"
       :roomId="roomId"
     />
-    <task-manager @show-right-tab="(tab) => showTab(tab)" />
-    <stream-screen :class="tab ? '.stream-screen' : '.stream-screen-full'" />
+    <task-manager
+      @show-right-tab="(tab) => showTab(tab)"
+    />
+    <stream-screen
+      :class="tab ? '.stream-screen' : '.stream-screen-full'"
+    />
   </div>
 </template>
 <script>
 import ChatMeeting from "./Meeting/ChatMeeting.vue";
 import StreamScreen from "./Meeting/StreamScreen.vue";
 import TaskManager from "./Meeting/TaskManager.vue";
+
+import SimplePeer from "simple-peer";
+
 export default {
   components: { ChatMeeting, StreamScreen, TaskManager },
   data() {
@@ -20,6 +27,7 @@ export default {
       roomId: this.$route.params.id,
     };
   },
+
   methods: {
     showTab(tab) {
       // console.log(tab);

@@ -11,28 +11,22 @@ const defaultData = {
 export default {
     namespaced: true,
     state: {
-        loading: false,
+        videoUser: null,
         spinning: false,
         visibleModal: false,
-        listSearchResultUser: [],
-        listGroup: [],
-        errorList: [],
-        selectedItem: {
-            name: '',
-            description: '',
-            members: [],
-            owner: ''
+        mediaDevice: {
+            camera: false,
+            micro: false
         },
-        formData: {
-            name: '',
-            description: '',
-            members: [],
-            owner: ''
-        }
+        listClient: [],
+        peer: [],
     },
     mutations: {
-        setVisibleModal(state, value) {
-            state.visibleModal = value;
+        setVideoUser(state, videoObject) {
+            state.videoUser = videoObject;
+        },
+        setMediaDevice(state, value) {
+            state.mediaDevice = value
         },
         setSpinning(state, value) {
             state.spinning = value
@@ -40,99 +34,49 @@ export default {
         setLoading(state, value) {
             state.loading = value
         },
-        setFormData(state, value) {
-            state.formData = {
-                ...state.formData,
-                ...value
-            }
+        sliceClient(state, value) {
+            state.listClient.splice(value, 1);
         },
-        setItemData(state, value) {
-            state.selectedItem = {
-                ...state.selectedItem,
-                ...value
-            };
+        pushNewClient(state, value) {
+            state.listClient.push(value);
         },
-        setListGroup(state, value) {
-            state.listGroup = value;
-        },
-        setlistSearchResultUser(state, value) {
-            state.listSearchResultUser = value
-        },
-        addUser(state, { member, index }) {
-            state.formData.members.push(member);
-            state.listSearchResultUser[index].checked = true;
-        },
-        setFormField(state, data) {
-            state.formData = {
-                ...state.formData,
-                ...data
-            }
-        },
-        removeUser(state, { member, }) {
-            state.formData.members = state.formData.members.filter(e => e.username !== member.username);
-            let searchUserResult = state.listSearchResultUser.find(e => e.username === member.username);
-            if (searchUserResult)
-                searchUserResult.checked = false;
+        clearConnection(state, value) {
+            state.listClient = [];
         }
+
     },
     actions: {
-        resetForm ({commit}){
-            commit('setFormData', defaultData);
-            commit('setItemData', defaultData);
-            commit('setlistSearchResultUser', [])
-        },
-        async fetchOneGroupForEdit({ commit, state }, id) {
-            let response = await getRequest('group/' + id).catch(err => {
-                commit('setSpinning', false);
-            })
-            if (response) {
-                commit('setSpinning', false);
-                commit('setFormData', response);
-                commit('setItemData', response);
+        addClient({ commit, state }, data) {
+            commit("pushNewClient", data);
+            let vt = state.listClient.findIndex(e => e.socketId === data.socketId);
+            let peerMap = state.listClient.find(e => e.socketId === data.socketId);
+            if (peerMap) {
+                peerMap.peerObject.on("error", err => {
+                    peerMap.peerObject.destroy()
+                    // commit("sliceClient", vt);
+                });
+                peerMap.peerObject.on("close", err => {
+                    commit("sliceClient", vt);
+                });
             }
         },
-        async fetchAllGroup({ commit, state }) {
-            let response = await getRequest('group').catch(err => {
-                commit('setSpinning', false);
-            })
-            if (response) {
-                commit('setSpinning', false);
-                commit('setListGroup', response);
+        signalAnswerToken({ commit, state }, data) {
+            let peerMap = state.listClient.find(e => e.socketId === data.socketId);
+            if (peerMap) {
+                peerMap.peerObject.signal(data.token);
             }
         },
-
-        async findUser({ commit, state }, data) {
-            if (data?.username?.trim()?.length) {
-                let response = await getRequest('user/find-user', data).catch(err => {
-                    commit('setLoading', false)
-                })
-                if (response) {
-                    commit('setLoading', false);
-                    let userData = response.map(e => {
-                        return {
-                            ...e,
-                            checked: state.formData.members.findIndex(el => el.username === e.username) !== -1
-                        }
-                    })
-                    commit('setlistSearchResultUser', userData);
-                }
-            }
-            else {
-                commit('setlistSearchResultUser',);
-            }
+        startVideoCall({ commit, state }, data) {
+            commit("setVideoUser", data)
+            state.listClient.forEach(element => {
+                element.peerObject.addStream(data);
+            });
         },
-        async submit({ commit, dispatch, state }) {
-            let result = await postRequest('group', state.formData)
-                .catch(err => {
-                    this._vm.$message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
-                    commit('setLoading', false)
-                })
-            if (result) {
-                commit('setLoading', false);
-                commit('setVisibleModal', false);
-                dispatch('fetchAllGroup');
-                this._vm.$message.success("Thành công");
-            }
-        }
+        destroyAllConnection({ commit, state }, data) {
+            state.listClient.forEach(element => {
+                element.peerObject.destroy()
+            });
+            // commit("clearConnection");
+        },
     }
 }

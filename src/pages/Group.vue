@@ -58,24 +58,12 @@
 <script>
 import PostItem from "./Group/PostItem.vue";
 import ChatMeeting from "./Meeting/ChatMeeting.vue";
-const listData = [];
-for (let i = 0; i < 4; i++) {
-  listData.push({
-    href: "https://www.antdv.com/",
-    title: `Tên người ${i}`,
-    avatar: "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
-    description:
-      "Ant Design, a design language for background applications, is refined by Ant UED Team.",
-    content:
-      "We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.",
-  });
-}
 
 export default {
   components: { ChatMeeting, PostItem },
   data() {
     return {
-      listData,
+      listData:[],
       roomId: this.$route.params.id,
       loading: false,
       loadingMore: false,

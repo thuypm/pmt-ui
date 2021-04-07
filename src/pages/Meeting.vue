@@ -9,6 +9,7 @@
     />
     <stream-screen
       :class="tab ? '.stream-screen' : '.stream-screen-full'"
+      :roomId = roomId
     />
   </div>
 </template>

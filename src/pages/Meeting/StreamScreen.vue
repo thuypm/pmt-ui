@@ -20,13 +20,17 @@ import { PeerClass } from "./PeerClass";
 import SimplePeer from "simple-peer";
 // let socket = io.connect(process.env.VUE_APP_HOST_WS_MEETING);
 let myPeer = [];
-let peer = [];
+let yourPeer = [];
+
 export default {
   components: { ShareScreen, CameraScreen },
+  props: ["roomId"],
   data() {
     return {
       meetingSocket: io.connect(process.env.VUE_APP_HOST_WS_MEETING),
       username: localStorage.username,
+      myPeer: [],
+      yourPeer: []
     };
   },
   computed: {
@@ -41,75 +45,149 @@ export default {
     },
   },
   created() {
-    this.meetingSocket.emit("join-room", this.roomId, this.username);
-    this.meetingSocket.on("new-client", (data) => {
-      if (data.socketId !== this.meetingSocket.id) {
-        let newPeer = new PeerClass({
-          socketId: data.socketId,
-          username: data.username,
-          stream: null,
-          peerObject: new SimplePeer({
-            initiator: true,
-            trickle: false,
-          }),
-        });
-        newPeer.peerObject.on("signal", (token) => {
-          console.log("initiator", token);
-          this.meetingSocket.emit("res-new-client", {
-            clientId: data.socketId,
-            socketId: this.meetingSocket.id,
-            username: this.username,
-            token: token,
-          });
-        });
-        this.$store.dispatch("meeting/addClient", newPeer);
-      }
+    this.meetingSocket.emit("join-room", {
+      roomId: this.roomId,
+      clientId: this.meetingSocket.id,
+      username: this.username,
     });
-
-    this.meetingSocket.on("offer-token", (data) => {
-      if (data.socketId !== this.meetingSocket.id) {
-        if (data.token.type === "offer") {
+    this.meetingSocket.on("res-new-client", (data) => {
+      this.$store.commit("meeting/pushNewClient", data);
+    });
+    this.meetingSocket.on("disconnected", (clientId) => {
+      this.$store.commit("meeting/removeClient", clientId);
+      myPeer = myPeer.filter((e) => e.clientId !== clientId);
+      yourPeer = yourPeer.filter((e) => e.clientId !== clientId);
+    });
+    this.meetingSocket.on("new-client", (data) => {
+      if (data.clientId !== this.meetingSocket.id) {
+        if (this.$store.state.meeting.videoUser) {
           let newPeer = new PeerClass({
-            socketId: data.socketId,
+            clientId: data.clientId,
             username: data.username,
-            stream: null,
-            peerObject: new SimplePeer({
+            peer: new SimplePeer({
+              initiator: true,
               trickle: false,
+              stream: this.$store.state.meeting.videoUser,
             }),
           });
-          newPeer.peerObject.signal(data.token);
-          newPeer.peerObject.on("signal", (token) => {
-            console.log("noinitiator", token);
-            this.meetingSocket.emit("answer-token", {
-              clientId: data.socketId,
+          newPeer.peer.on("signal", (token) => {
+            this.meetingSocket.emit("on-video", {
+              clientId: data.clientId,
               socketId: this.meetingSocket.id,
               username: this.username,
               token: token,
             });
           });
-          this.$store.dispatch("meeting/addClient", newPeer);
+          myPeer.push(newPeer);
         } else {
-          this.$store.dispatch("meeting/signalAnswerToken", data);
+          this.meetingSocket.emit("res-new-client", {
+            clientId: this.meetingSocket.id,
+            socketId: data.clientId,
+            username: this.username,
+          });
         }
+        this.$store.commit("meeting/pushNewClient", data);
       }
     });
-    this.meetingSocket.on("answer-token", (data) => {
-      if (data.socketId !== this.meetingSocket.id) {
-        this.$store.dispatch("meeting/signalAnswerToken", data);
+    this.meetingSocket.on("off-video", (data) => {
+      if (data.clientId !== this.meetingSocket.id) {
+        this.$store.commit("meeting/resetOneClient", data);
+        yourPeer = yourPeer.filter((e) => e.clientId !== data.clientId);
       }
+    });
+    this.meetingSocket.on("on-video", (data) => {
+      let newPeer = new PeerClass({
+        clientId: data.clientId,
+        peer: new SimplePeer({
+          trickle: false,
+        }),
+        username: data.username,
+      });
+      newPeer.peer.on("error", (error)=>{
+        newPeer.close();
+      })
+      newPeer.peer.signal(data.token);
+      newPeer.peer.on("signal", (token) => {
+        this.meetingSocket.emit("res-on-video", {
+          clientId: this.meetingSocket.id,
+          socketId: data.clientId,
+          token: token,
+          username: this.username,
+        });
+      });
+
+      newPeer.peer.on("stream", (stream) => {
+        this.$store.commit("meeting/setStreamClient", {
+          clientId: data.clientId,
+          username: data.username,
+          stream: stream,
+        });
+      });
+
+      yourPeer.push(newPeer);
+    });
+
+    this.meetingSocket.on("res-on-video", (data) => {
+      let peerObj = myPeer.find((e) => e.clientId === data.clientId);
+      if (peerObj) peerObj.peer.signal(data.token);
     });
   },
   beforeDestroy() {
+    myPeer.forEach((peerObj) => {
+      peerObj.peer.destroy();
+    });
+    yourPeer.forEach((peerObj) => {
+      peerObj.peer.destroy();
+    });
+    this.$store.commit("meeting/resetAllClient");
+    this.$store.commit("meeting/stopVideoUser");
+    myPeer = [];
+    yourPeer = [];
     this.meetingSocket.close();
-    this.$store.dispatch("meeting/destroyAllConnection");
   },
   methods: {
     handleGetDevice(media) {
+      if (this.$store.state.meeting.videoUser) {
+        this.$store.commit("meeting/stopVideoUser");
+        this.meetingSocket.emit("off-video", {
+          roomId: this.roomId,
+          clientId: this.meetingSocket.id,
+          username: this.username,
+        });
+        myPeer.forEach((peerObj) => {
+          peerObj.peer.destroy();
+        });
+        myPeer = [];
+      }
       if (media.camera || media.micro) {
         navigator.mediaDevices
           .getUserMedia({ audio: media.micro, video: media.camera })
           .then((stream) => {
-            this.$store.dispatch("meeting/startVideoCall", stream);
+            this.$store.state.meeting.listClient.forEach((client) => {
+              let newPeer = new PeerClass({
+                clientId: client.clientId,
+                username: client.username,
+                peer: new SimplePeer({
+                  initiator: true,
+                  trickle: false,
+                  stream: stream,
+                }),
+              });
+              newPeer.peer.on("error", (error) => {
+                newPeer.close();
+              })
+              newPeer.peer.on("signal", (token) => {
+                this.meetingSocket.emit("on-video", {
+                  clientId: client.clientId,
+                  socketId: this.meetingSocket.id,
+                  username: this.username,
+                  token: token,
+                });
+              });
+              myPeer.push(newPeer);
+            });
+
+            this.$store.commit("meeting/setVideoUser", stream);
           });
       }
     },

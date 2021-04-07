@@ -5,21 +5,24 @@
       <b style="line-height: 40px">Nhóm của bạn</b>
     </div>
     <div class="join-function">
-      <a-form layout="inline">
-        <a-form-item class="join-item-pane" label="Nhập code nhóm">
+      <a-form :form="form" @submit="handleSubmit" layout="inline">
+        <a-form-item class="join-item-pane" label="Nhập mã nhóm">
           <span>
-            <a-input type="text" />
+            <a-input v-decorator="['group_code']" type="text" />
           </span>
         </a-form-item>
         <a-form-item class="join-item-pane">
-          <a-button type="primary" html-type="submit"> Tham gia </a-button>
-        </a-form-item>
-        <a-form-item class="join-item-pane">
-          <a-button type="button" @click="() => setVisibleModal(true)"
-            ><a-icon type="plus-circle" />Tạo nhóm mới</a-button
-          >
+          <a-button :loading="loading" type="primary" html-type="submit">
+            Tham gia
+          </a-button>
         </a-form-item>
       </a-form>
+
+      <a-form-item class="join-item-pane">
+        <a-button type="button" @click="() => setVisibleModal(true)">
+          <a-icon type="plus-circle" />Tạo nhóm mới</a-button
+        >
+      </a-form-item>
     </div>
   </div>
 </template>
@@ -29,13 +32,27 @@ import GroupModal from "./GroupModal.vue";
 export default {
   components: { GroupModal },
   data() {
-    return {};
+    return {
+      form: this.$form.createForm(this, { name: "coordinated" }),
+    };
   },
-
+  computed: {
+    ...mapState({
+      loading: (state) => state.group.loading,
+    }),
+  },
   methods: {
     ...mapMutations({
-      setVisibleModal: 'group/setVisibleModal',
-    })
+      setVisibleModal: "group/setVisibleModal",
+    }),
+    handleSubmit(e) {
+      e.preventDefault();
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          this.$store.dispatch("group/joinGroup", values);
+        }
+      });
+    },
   },
 };
 </script>

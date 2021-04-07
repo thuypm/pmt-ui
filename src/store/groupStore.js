@@ -1,7 +1,7 @@
-import { postRequest, getRequest } from "../services/api";
+import { postRequest, getRequest, putRequest } from "../services/api";
 import router from '../router/index'
-
 const defaultData = {
+    _id: null,
     name: '',
     description: '',
     members: [],
@@ -18,12 +18,14 @@ export default {
         listGroup: [],
         errorList: [],
         selectedItem: {
+            _id: null,
             name: '',
             description: '',
             members: [],
             owner: ''
         },
         formData: {
+            _id: null,
             name: '',
             description: '',
             members: [],
@@ -76,10 +78,11 @@ export default {
         }
     },
     actions: {
-        resetForm ({commit}){
+        resetForm({ commit }) {
             commit('setFormData', defaultData);
             commit('setItemData', defaultData);
-            commit('setlistSearchResultUser', [])
+            commit('setlistSearchResultUser', []);
+
         },
         async fetchOneGroupForEdit({ commit, state }, id) {
             let response = await getRequest('group/' + id).catch(err => {
@@ -100,7 +103,18 @@ export default {
                 commit('setListGroup', response);
             }
         },
-
+        async joinGroup({ commit, state, dispatch }, {group_code}) {
+            let response = await putRequest('group/join', {
+                group_code: group_code,
+                username: localStorage.username
+            }).catch(err => {
+                commit('setSpinning', false);
+            })
+            if (response) {
+                this._vm.$message.success("Đã tham gia nhóm");
+                dispatch('fetchAllGroup');
+            }
+        },
         async findUser({ commit, state }, data) {
             if (data?.username?.trim()?.length) {
                 let response = await getRequest('user/find-user', data).catch(err => {
@@ -130,6 +144,25 @@ export default {
             if (result) {
                 commit('setLoading', false);
                 commit('setVisibleModal', false);
+                commit('setFormData', defaultData);
+                commit('setItemData', defaultData);
+                commit('setlistSearchResultUser', []);
+                dispatch('fetchAllGroup');
+                this._vm.$message.success("Thành công");
+            }
+        },
+        async submitEditGroup({ commit, dispatch, state }) {
+            let result = await putRequest('group/' + state.formData._id, state.formData)
+                .catch(err => {
+                    this._vm.$message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
+                    commit('setLoading', false)
+                })
+            if (result) {
+                commit('setLoading', false);
+                commit('setVisibleModal', false);
+                commit('setFormData', defaultData);
+                commit('setItemData', defaultData);
+                commit('setlistSearchResultUser', []);
                 dispatch('fetchAllGroup');
                 this._vm.$message.success("Thành công");
             }

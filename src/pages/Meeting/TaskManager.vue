@@ -8,7 +8,7 @@
         'meeting-function-button': true,
         active: camera,
       }"
-      @click="() => turnOnDevice()"
+      @click="() => turnOnDevice(true, false)"
     >
       <unicon
         :name="camera ? 'video' : 'video-slash'"
@@ -63,11 +63,17 @@ export default {
     };
   },
   methods: {
-    turnOnDevice() {
-      this.$store.commit("meeting/setMediaDevice", {
-        camera: true,
-        micro: false,
-      });
+    turnOnDevice(editCamera, editMicro) {
+      if (editCamera)
+        this.$store.commit("meeting/setMediaDevice", {
+          camera: !this.$store.state.meeting.mediaDevice.camera,
+          micro: this.$store.state.meeting.mediaDevice.micro,
+        });
+      if (editMicro)
+        this.$store.commit("meeting/setMediaDevice", {
+          camera: this.$store.state.meeting.mediaDevice.camera,
+          micro: !this.$store.state.meeting.mediaDevice.micro,
+        });
     },
     changeCurrentTab(tab) {
       if (this.activeTab === tab) this.activeTab = null;

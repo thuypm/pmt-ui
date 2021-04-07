@@ -34,31 +34,51 @@ export default {
         setLoading(state, value) {
             state.loading = value
         },
-        sliceClient(state, value) {
-            state.listClient.splice(value, 1);
+        stopVideoUser(state, value) {
+            if (state.videoUser)
+                state.videoUser.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+            state.videoUser = null;
+        },
+        removeClient(state, value) {
+            state.listClient = state.listClient.filter(e => e.clientId !== value);
+        },
+        resetOneClient(state, data) {
+            let client = state.listClient.find(e => e.socketId === data.clienId);
+            if (client) {
+                let newClientObject = {
+                    ...client,
+                    stream: null
+                }
+                client.stream.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+                state.listClient = state.listClient.filter(e => e.clientId !== data.clientId).concat([newClientObject]);
+            }
+        },
+        resetAllClient(state) {
+            state.mediaDevice = {
+                camera: false,
+                micro: false
+            };
+            state.listClient = [];
         },
         pushNewClient(state, value) {
             state.listClient.push(value);
         },
-        clearConnection(state, value) {
-            state.listClient = [];
+        setStreamClient(state, data) {
+            // console.log(state.listClient.find(e=>e.clientId === data.clientId ))
+            state.listClient = [{
+                ...data
+            }].concat(state.listClient.filter(e => e.clientId !== data.clientId));
         }
+
 
     },
     actions: {
         addClient({ commit, state }, data) {
             commit("pushNewClient", data);
-            let vt = state.listClient.findIndex(e => e.socketId === data.socketId);
-            let peerMap = state.listClient.find(e => e.socketId === data.socketId);
-            if (peerMap) {
-                peerMap.peerObject.on("error", err => {
-                    peerMap.peerObject.destroy()
-                    // commit("sliceClient", vt);
-                });
-                peerMap.peerObject.on("close", err => {
-                    commit("sliceClient", vt);
-                });
-            }
         },
         signalAnswerToken({ commit, state }, data) {
             let peerMap = state.listClient.find(e => e.socketId === data.socketId);
@@ -71,12 +91,6 @@ export default {
             state.listClient.forEach(element => {
                 element.peerObject.addStream(data);
             });
-        },
-        destroyAllConnection({ commit, state }, data) {
-            state.listClient.forEach(element => {
-                element.peerObject.destroy()
-            });
-            // commit("clearConnection");
         },
     }
 }

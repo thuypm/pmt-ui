@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as querystring from 'querystring';
+import {message} from 'ant-design-vue';
 
 
 import { HTTP_CODE_RESPONSE } from '../utils/constants';
@@ -9,6 +10,13 @@ async function handleError(err) {
     switch (err.status) {
         case HTTP_CODE_RESPONSE.NOT_FOUND: {
 
+            break;
+        }
+        case HTTP_CODE_RESPONSE.BAD_REQUEST: {
+            console.log(err.errors)
+            err.errors.forEach(e=>{
+                 message.error(e.content)
+            })
             break;
         }
         case HTTP_CODE_RESPONSE.UNAUTHENTICATE: {
@@ -48,6 +56,17 @@ export  function postRequest(url, params,) {
             resolve(response.data);
         }).catch(err => {
             handleError(err.response)
+            reject(err.response?.data);
+        })
+    })
+}
+
+export  function putRequest(url, params,) {
+    return new Promise((resolve, reject) => {
+        axios.put(process.env.VUE_APP_HOST_API + url, params, { headers: generateHeader() }).then((response) => {
+            resolve(response.data);
+        }).catch(err => {
+            handleError(err.response?.data)
             reject(err.response?.data);
         })
     })

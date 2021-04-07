@@ -17,38 +17,38 @@
         </a-button>
       </template>
       <a-form :form="form">
-        <a-form-item label="Tên nhóm">
+        <a-form-item label="Tên nhóm" v-if="!formData._id || formData.owner.username === username">
           <a-input
             v-decorator="[
               'name',
               {
                 rules: [{ required: true, message: 'Hãy nhập tên nhóm' }],
-                initialValue: formData.name
+                initialValue: formData.name,
               },
             ]"
             aria-placeholder="vip"
           ></a-input>
         </a-form-item>
-        <a-form-item label="Mô tả">
+        <a-form-item label="Mô tả" v-if="!formData._id || formData.owner.username === username">
           <a-textarea
             v-decorator="[
               'description',
               {
                 rules: [{ required: true, message: 'Hãy nhập mô tả của nhóm' }],
-                 initialValue: formData.description
+                initialValue: formData.description,
               },
             ]"
           ></a-textarea>
         </a-form-item>
         <a-form-item label="Thành viên">
           <a-tag class="list-member-item">
-            <a-icon style="color: green" type="check-circle" /> Bạn(Chủ sở hữu)
+            <a-icon style="color: green" type="check-circle" /> {{(!formData._id ||formData.owner.username === username?"Bạn": formData.owner.username )+ "(Chủ sở hữu)"}}
           </a-tag>
           <a-tag
             v-for="(member, index) in formData.members"
             :key="index"
             class="list-member-item"
-            :closable="true"
+            :closable="!formData._id ||formData.owner.username === username"
             @close="() => handleRemoveUser(member)"
           >
             {{ member.username }}
@@ -78,7 +78,7 @@
               </div>
             </template>
             <a-input
-              aria-placeholder="Thêm thành viên"  
+              aria-placeholder="Thêm thành viên"
               @change="findUser"
             ></a-input>
           </a-popover>
@@ -95,6 +95,7 @@ export default {
     return {
       visible: false,
       form: null,
+      username: localStorage.username
     };
   },
   computed: {
@@ -108,10 +109,10 @@ export default {
   },
   watch: {
     selectedItem(value) {
-        this.form.setFieldsValue({
-          name: value.name,
-          description: value.description,
-        });
+      this.form.setFieldsValue({
+        name: value.name,
+        description: value.description,
+      });
     },
   },
   created() {
@@ -132,7 +133,7 @@ export default {
     });
   },
   methods: {
-    handleRemoveUser(member, index){
+    handleRemoveUser(member, index) {
       this.$store.commit("group/removeUser", { member });
     },
     handleAddOrRemoveUser(member, index) {
@@ -142,7 +143,7 @@ export default {
     },
     handleClose() {
       this.$store.commit("group/setVisibleModal", false);
-       this.$store.dispatch("group/resetForm", false);
+      this.$store.dispatch("group/resetForm", false);
     },
     findUser({ target: { value } }) {
       if (timeout) clearTimeout(timeout);
@@ -153,7 +154,9 @@ export default {
     handleOk(e) {
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.$store.dispatch("group/submit");
+          if (!this.$store.state.group.formData._id)
+            this.$store.dispatch("group/submit");
+          else this.$store.dispatch("group/submitEditGroup");
         }
       });
     },

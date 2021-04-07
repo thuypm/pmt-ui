@@ -6,7 +6,8 @@
       src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
     />
     <template slot="actions" class="ant-card-actions">
-      <a-icon key="edit" type="edit" @click="editGroup" />
+      <a-icon key="edit" type="edit" @click="editGroup" v-if="group.owner.username === username" />
+       <a-icon type="plus-circle" @click="editGroup" v-else/>
       <a-icon type="forward" @click="gotoMeeting"/>
       <a-icon key="setting" type="setting" />
     </template>
@@ -17,6 +18,12 @@
 import { mapMutations } from 'vuex';
 export default {
   props: ["group"],
+  data(){
+    return {
+      username: localStorage.username
+    }
+    
+  },
   methods:{
     editGroup()
     {

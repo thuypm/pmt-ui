@@ -18,8 +18,9 @@
     <div
       :class="{
         'meeting-function-button': true,
-        active: camera,
+        active: microphone,
       }"
+       @click="() => turnOnDevice(false, true)"
     >
       <unicon
         :name="microphone ? 'microphone' : 'microphone-slash'"
@@ -54,13 +55,20 @@
   </div>
 </template>
 <script>
+import { mapState } from 'vuex';
 export default {
   data() {
     return {
       activeTab: null,
-      camera: false,
-      microphone: false,
+      // camera: false,
+      // microphone: false,
     };
+  },
+  computed:{
+    ...mapState({
+      camera: state => state.meeting.mediaDevice.camera,
+      microphone: state => state.meeting.mediaDevice.micro,
+    })
   },
   methods: {
     turnOnDevice(editCamera, editMicro) {

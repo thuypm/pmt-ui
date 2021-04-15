@@ -1,7 +1,14 @@
 <template>
   <div style="padding: 0 10px 0 10px">
-    <edit-group />
     <join-group />
+    <a-modal
+      title="Xác nhận"
+      v-model="visible"
+      @ok="handleOk"
+      @cancel="handleCancel"
+    >
+      <p>{{ currentModalGroup ? currentModalGroup.confirmText : "" }}</p>
+    </a-modal>
 
     <hr style="margin: 0; opacity: 50%" />
     <a-spin :spinning="spinning" style="margin-top: 56px" tip="Đang tải...">
@@ -14,6 +21,7 @@
         >
           <group-card
             v-for="(group, id) in listGroup"
+            @open-confirm-dialog="(value) => handleOpenConfirmPopup(value)"
             :key="id"
             :group="group"
           />
@@ -25,24 +33,43 @@
 
 <script>
 import { mapState } from "vuex";
-import EditGroup from "../components/Modal/EditGroup.vue";
 import GroupCard from "./AllGroup/GroupCard.vue";
 import JoinGroup from "./AllGroup/JoinGroup.vue";
 export default {
-  components: { GroupCard, JoinGroup, EditGroup },
+  components: { GroupCard, JoinGroup },
   data() {
     return {
+      visible: false,
+      currentModalGroup: null,
     };
   },
   computed: {
     ...mapState({
-      spinning: (state) => state.group.spinning ,
+      spinning: (state) => state.group.spinning,
       listGroup: (state) => state.group.listGroup,
     }),
   },
   created() {
     this.$store.dispatch("group/fetchAllGroup");
   },
-  methods: {},
+  methods: {
+    handleOk() {
+      this.$store.dispatch(
+        this.currentModalGroup?.action,
+        this.currentModalGroup?.group?._id
+      );
+      this.visible = false;
+      this.currentModalGroup = null;
+    },
+    handleCancel() {
+      this.visible = false;
+      this.currentModalGroup = null;
+    },
+    handleOpenConfirmPopup(value) {
+      // console.log(value);
+      this.visible = true;
+      this.currentModalGroup = value;
+    },
+  },
 };
 </script>

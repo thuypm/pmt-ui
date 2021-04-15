@@ -4,6 +4,7 @@
     <a-menu theme="dark" mode="inline" :default-selected-keys="['3']">
       <a-menu-item key="1">
         <router-link :to="'/notification'">
+          <a-badge v-show="haveNewNotice" class="dot-vip" dot></a-badge>
           <a-icon type="bell" />
           <span>Thông báo</span>
         </router-link>
@@ -20,21 +21,11 @@
           <span>Nhóm</span>
         </router-link>
       </a-menu-item>
-      <a-menu-item key="4">
-        <a-icon type="file" />
-        <span>File</span>
-      </a-menu-item>
-      <a-menu-item key="5">
-        <router-link :to="'/group'">
-          <a-icon type="experiment" />
-        </router-link>
-        <span>Bài tập</span>
-      </a-menu-item>
       <a-menu-item style="">
         <router-link :to="'/exercise'">
           <a-icon type="experiment" />
+          <span>Bài tập</span>
         </router-link>
-        <span>Bài tập</span>
       </a-menu-item>
     </a-menu>
     <div />
@@ -42,10 +33,27 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
-  props: ["collapsed"],
+  // props: ["collapsed"],
   data() {
-    return {};
+    return {
+      collapsed: true,
+    };
+  },
+  created(){
+    this.$noti.socket.emit("get-status-notice");
+      this.$noti.socket.on("res-status-notice", (data)=>{
+
+      });
+      this.$noti.socket.on("read-all-notice", ()=>{
+        this.$store.commit('noti/setHaveNewNotice', false);
+      })
+  },
+  computed:{
+    ...mapState({
+      haveNewNotice: state=> state.noti.haveNewNotice
+    })
   },
   methods: {
     // toggleCollapsed() {
@@ -55,4 +63,9 @@ export default {
 };
 </script>
 <style scoped>
+.dot-vip {
+  position: absolute;
+  top: 10px;
+  left: 40px;
+}
 </style>

@@ -1,5 +1,7 @@
 import io from "socket.io-client";
+import router from "../router";
 import { generateHeader } from "../services/api";
+import { Icon } from 'ant-design-vue';
 export default class Noti {
   //Constructor to set the store reference, create socket io instance and initialize listeners.
   constructor(store, noti) {
@@ -12,14 +14,19 @@ export default class Noti {
   }
   async initListeners() {
     this.socket.on('notification', (notice) => {
-      this.noti.open({
+      this.noti.info({
         message: notice?.title,
         description: notice?.content,
         placement: "bottomRight",
+        // icon: <Icon type="info" style="color: #108ee9" />,
+
         onClick: () => {
-          console.log(notice.action);
+          this.socket.emit('read-notice', [notice.id]);
+          if (notice.action)
+            router.push(notice.action).catch(err => { });
         },
       });
+      this.store.commit('noti/setHaveNewNotice', true);
     })
   }
 }

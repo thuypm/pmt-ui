@@ -17,7 +17,10 @@
         </a-button>
       </template>
       <a-form :form="form">
-        <a-form-item label="Tên nhóm" v-if="!formData._id || formData.owner.username === username">
+        <a-form-item
+          label="Tên nhóm"
+          v-if="!formData._id || formData.owner.username === username"
+        >
           <a-input
             v-decorator="[
               'name',
@@ -29,7 +32,10 @@
             aria-placeholder="vip"
           ></a-input>
         </a-form-item>
-        <a-form-item label="Mô tả" v-if="!formData._id || formData.owner.username === username">
+        <a-form-item
+          label="Mô tả"
+          v-if="!formData._id || formData.owner.username === username"
+        >
           <a-textarea
             v-decorator="[
               'description',
@@ -42,13 +48,18 @@
         </a-form-item>
         <a-form-item label="Thành viên">
           <a-tag class="list-member-item">
-            <a-icon style="color: green" type="check-circle" /> {{(!formData._id ||formData.owner.username === username?"Bạn": formData.owner.username )+ "(Chủ sở hữu)"}}
+            <a-icon style="color: green" type="check-circle" />
+            {{
+              (!formData._id || formData.owner.username === username
+                ? "Bạn"
+                : formData.owner.username) + "(Chủ sở hữu)"
+            }}
           </a-tag>
           <a-tag
             v-for="(member, index) in formData.members"
             :key="index"
             class="list-member-item"
-            :closable="!formData._id ||formData.owner.username === username"
+            :closable="!formData._id || formData.owner.username === username"
             @close="() => handleRemoveUser(member)"
           >
             {{ member.username }}
@@ -95,7 +106,7 @@ export default {
     return {
       visible: false,
       form: null,
-      username: localStorage.username
+      username: localStorage.username,
     };
   },
   computed: {
@@ -109,10 +120,11 @@ export default {
   },
   watch: {
     selectedItem(value) {
-      this.form.setFieldsValue({
-        name: value.name,
-        description: value.description,
-      });
+      if (this.visibleModal)
+        this.form.setFieldsValue({
+          name: value.name,
+          description: value.description,
+        });
     },
   },
   created() {
@@ -154,8 +166,13 @@ export default {
     handleOk(e) {
       this.form.validateFields((err, values) => {
         if (!err) {
-          if (!this.$store.state.group.formData._id)
-            this.$store.dispatch("group/submit");
+          if (
+            this.formData.owner &&
+            (this.formData.owner.username != this.formData.owner.username) !==
+              this.username
+          )
+            this.$store.dispatch("group/addMemberGroup");
+          else if (!this.formData._id) this.$store.dispatch("group/submit");
           else this.$store.dispatch("group/submitEditGroup");
         }
       });

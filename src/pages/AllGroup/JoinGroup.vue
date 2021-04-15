@@ -1,7 +1,7 @@
 <template>
   <div class="join-pane">
-    <group-modal />
     <div class="join-tilte">
+      <group-modal />
       <b style="line-height: 40px">Nhóm của bạn</b>
     </div>
     <div class="join-function">

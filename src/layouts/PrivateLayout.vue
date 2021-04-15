@@ -1,13 +1,13 @@
     <template>
   <a-layout id="components-layout-demo-custom-trigger">
-    <side-bar :collapsed="collapsed" />
+    <side-bar />
     <a-layout>
-      <a-layout-header v-if="false" style="background: #fff; padding: 0">
+      <!-- <a-layout-header v-if="false" style="background: #fff; padding: 0">
         <Header
           :collapsed="collapsed"
           @collapsed="(e) => (collapsed = !collapsed)"
         />
-      </a-layout-header>
+      </a-layout-header> -->
       <a-layout-content
         :style="{
           background: '#f3f2f1',

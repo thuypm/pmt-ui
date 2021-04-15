@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as querystring from 'querystring';
-import {message} from 'ant-design-vue';
+import { message } from 'ant-design-vue';
 
 
 import { HTTP_CODE_RESPONSE } from '../utils/constants';
@@ -14,8 +14,8 @@ async function handleError(err) {
         }
         case HTTP_CODE_RESPONSE.BAD_REQUEST: {
             console.log(err.errors)
-            err.errors.forEach(e=>{
-                 message.error(e.content)
+            err.errors.forEach(e => {
+                message.error(e.content)
             })
             break;
         }
@@ -26,7 +26,7 @@ async function handleError(err) {
         }
     }
 }
-export  function generateHeader() {
+export function generateHeader() {
     let token = localStorage.token;
     let headers = {
         'authorization': 'Bearer ' + token,
@@ -34,14 +34,14 @@ export  function generateHeader() {
     };
     return headers
 }
-export  function getRequest(url, params) {
+export function getRequest(url, params) {
     return new Promise((resolve, reject) => {
         axios.get(process.env.VUE_APP_HOST_API + url, {
             params: params,
             paramsSerializer: (params) => {
                 return querystring.stringify(params, { arrayFormat: "brackets" });
             },
-            headers:  generateHeader(),
+            headers: generateHeader(),
         }).then((response) => {
             resolve(response.data);
         }).catch(err => {
@@ -50,7 +50,7 @@ export  function getRequest(url, params) {
         })
     })
 }
-export  function postRequest(url, params,) {
+export function postRequest(url, params,) {
     return new Promise((resolve, reject) => {
         axios.post(process.env.VUE_APP_HOST_API + url, params, { headers: generateHeader() }).then((response) => {
             resolve(response.data);
@@ -61,12 +61,41 @@ export  function postRequest(url, params,) {
     })
 }
 
-export  function putRequest(url, params,) {
+export function putRequest(url, params,) {
     return new Promise((resolve, reject) => {
         axios.put(process.env.VUE_APP_HOST_API + url, params, { headers: generateHeader() }).then((response) => {
             resolve(response.data);
         }).catch(err => {
             handleError(err.response?.data)
+            reject(err.response?.data);
+        })
+    })
+}
+export function deleteRequest(url, params) {
+    return new Promise((resolve, reject) => {
+        axios.delete(process.env.VUE_APP_HOST_API + url, {
+            params: params,
+            paramsSerializer: (params) => {
+                return querystring.stringify(params, { arrayFormat: "brackets" });
+            },
+            headers: generateHeader(),
+        }).then((response) => {
+            resolve(response.data);
+        }).catch(err => {
+            handleError(err.response)
+            reject(err.response?.data);
+        })
+    })
+}
+
+export function patchRequest(url, body) {
+    return new Promise((resolve, reject) => {
+        axios.patch(process.env.VUE_APP_HOST_API + url,body, {
+            headers: generateHeader(),
+        }).then((response) => {
+            resolve(response.data);
+        }).catch(err => {
+            handleError(err.response)
             reject(err.response?.data);
         })
     })

@@ -5,6 +5,7 @@ import Vuex from 'vuex'
 import authStore from './authStore'
 import groupStore from './groupStore';
 import meetingStore from './meetingStore';
+import notificaitonStore from './notificaitonStore';
 import userStore from './userStore'
 
 
@@ -15,7 +16,8 @@ const store = new Vuex.Store({
         user: userStore,
         auth: authStore,
         group: groupStore,
-        meeting: meetingStore
+        meeting: meetingStore,
+        noti: notificaitonStore
     }
 }) 
 

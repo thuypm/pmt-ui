@@ -1,11 +1,11 @@
-import { postRequest, getRequest, putRequest } from "../services/api";
+import { postRequest, getRequest, putRequest, deleteRequest, patchRequest } from "../services/api";
 import router from '../router/index'
 const defaultData = {
     _id: null,
     name: '',
     description: '',
     members: [],
-    owner: ''
+    owner: null
 }
 
 export default {
@@ -103,7 +103,7 @@ export default {
                 commit('setListGroup', response);
             }
         },
-        async joinGroup({ commit, state, dispatch }, {group_code}) {
+        async joinGroup({ commit, state, dispatch }, { group_code }) {
             let response = await putRequest('group/join', {
                 group_code: group_code,
                 username: localStorage.username
@@ -127,7 +127,9 @@ export default {
                             ...e,
                             checked: state.formData.members.findIndex(el => el.username === e.username) !== -1
                         }
-                    })
+                    });
+                    if (state.formData._id)
+                        userData = userData.filter(e => e.username !== state.formData.owner.username)
                     commit('setlistSearchResultUser', userData);
                 }
             }
@@ -139,6 +141,53 @@ export default {
             let result = await postRequest('group', state.formData)
                 .catch(err => {
                     this._vm.$message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
+                    commit('setLoading', false)
+                })
+            if (result) {
+                commit('setLoading', false);
+                commit('setVisibleModal', false);
+                commit('setFormData', defaultData);
+                commit('setItemData', defaultData);
+                commit('setlistSearchResultUser', []);
+                dispatch('fetchAllGroup');
+                this._vm.$message.success("Thành công");
+            }
+        },
+        async deleteGroup({ commit, dispatch, state }, data) {
+            let result = await deleteRequest('group/' + data)
+                .catch(err => {
+                    this._vm.$message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
+                    commit('setLoading', false)
+                })
+            if (result) {
+                commit('setLoading', false);
+                commit('setVisibleModal', false);
+                commit('setFormData', defaultData);
+                commit('setItemData', defaultData);
+                commit('setlistSearchResultUser', []);
+                dispatch('fetchAllGroup');
+                this._vm.$message.success("Thành công");
+            }
+        },
+        async leaveGGroup({ commit, dispatch, state }, data) {
+            let result = await patchRequest('group/' + data + "/leave" )
+                .catch(err => {
+                    this._vm.$message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
+                    commit('setLoading', false)
+                })
+            if (result) {
+                commit('setLoading', false);
+                commit('setVisibleModal', false);
+                commit('setFormData', defaultData);
+                commit('setItemData', defaultData);
+                commit('setlistSearchResultUser', []);
+                dispatch('fetchAllGroup');
+                this._vm.$message.success("Thành công");
+            }
+        },
+        async addMemberGroup({ commit, dispatch, state }) {
+            let result = await putRequest('group/' + state.formData._id + '/addMember', state.formData.members)
+                .catch(err => {
                     commit('setLoading', false)
                 })
             if (result) {

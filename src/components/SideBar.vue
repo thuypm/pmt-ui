@@ -22,7 +22,7 @@
         </router-link>
       </a-menu-item>
       <a-menu-item style="">
-        <router-link :to="'/exercise'">
+        <router-link :to="'/group-exercise'">
           <a-icon type="experiment" />
           <span>Bài tập</span>
         </router-link>

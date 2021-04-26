@@ -3,6 +3,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import authStore from './authStore'
+import exerciseStore from './exerciseStore';
 import groupStore from './groupStore';
 import meetingStore from './meetingStore';
 import notificaitonStore from './notificaitonStore';
@@ -17,7 +18,8 @@ const store = new Vuex.Store({
         auth: authStore,
         group: groupStore,
         meeting: meetingStore,
-        noti: notificaitonStore
+        noti: notificaitonStore,
+        exercise: exerciseStore
     }
 }) 
 

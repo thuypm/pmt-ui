@@ -1,35 +1,24 @@
 <template>
-    <a-list item-layout="horizontal" :data-source="data">
-      <a-list-item slot="renderItem" slot-scope="item">
-        <a-list-item-meta
-          description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-        >
-          <a slot="title" href="https://www.antdv.com/">{{ item.title }}</a>
-        </a-list-item-meta>
-      </a-list-item>
-    </a-list>
+  <a-list item-layout="horizontal" :data-source="listData">
+    <a-list-item slot="renderItem" slot-scope="item">
+      <a-list-item-meta :description="item.description">
+        <a slot="title" @click="() => handleEditExercise(item)">{{
+          item.name
+        }}</a>
+      </a-list-item-meta>
+    </a-list-item>
+  </a-list>
 </template>
 <script>
-const data = [
-  {
-    title: "Ant Design Title 1",
-  },
-  {
-    title: "Ant Design Title 2",
-  },
-  {
-    title: "Ant Design Title 3",
-  },
-  {
-    title: "Ant Design Title 4",
-  },
-];
 export default {
-    props:["type"],
+  props: ["type", "listData"],
   data() {
-    return {
-      data,
-    };
+    return {};
+  },
+  methods: {
+    handleEditExercise(item) {
+      this.$store.dispatch("exercise/fetchOneItem", item?._id);
+    },
   },
 };
 </script>

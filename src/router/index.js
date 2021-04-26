@@ -9,6 +9,7 @@ import Group from '@/pages/Group';
 import Signup from '@/pages/Signup'
 import File from '@/pages/File'
 import Meeting from '@/pages/Meeting'
+import ListGroupExercise from '@/pages/ListGroupExercise'
 import Exercise from '@/pages/Exercise'
 
 import Error404 from '@/pages/Error404'
@@ -60,20 +61,20 @@ const router = new Router({
             component: Group
           },
           {
-            path: 'exercise',
+            path: 'group-exercise',
             name: 'exercise',
-            component: Exercise
+            component: ListGroupExercise
           },
           {
             path: 'meeting/:id',
             name: 'meeting',
             component: Meeting
           },
-          //   {
-          //     path: 'exStudent/:id',
-          //     name: 'Exercise',
-          //     component: ExStudent
-          //   },
+          {
+            path: 'exercise/:id',
+            name: 'Exercise',
+            component: Exercise
+          },
           //   {
           //     path: 'exAdmin/:id',
           //     name: 'Manage',

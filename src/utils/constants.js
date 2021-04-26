@@ -17,5 +17,7 @@ export const HTTP_CODE_RESPONSE = {
     ERROR: 500,
   };
   export const TIME_FORMAT={
-      SHORT_FULL_TIME: "HH:mm, DD,MMM,yyyy" 
+      SHORT_FULL_TIME: "HH:mm, DD-MMM-yyyy",
+      HOUR_ONLY: "HH:mm",
+      DATE_ONLY: "DD-MMM-yyyy" 
   }

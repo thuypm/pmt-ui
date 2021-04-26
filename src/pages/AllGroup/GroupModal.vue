@@ -168,8 +168,7 @@ export default {
         if (!err) {
           if (
             this.formData.owner &&
-            (this.formData.owner.username != this.formData.owner.username) !==
-              this.username
+            this.formData.owner.username !== this.formData.owner.username
           )
             this.$store.dispatch("group/addMemberGroup");
           else if (!this.formData._id) this.$store.dispatch("group/submit");

@@ -13,8 +13,7 @@ async function handleError(err) {
             break;
         }
         case HTTP_CODE_RESPONSE.BAD_REQUEST: {
-            console.log(err.errors)
-            err.errors.forEach(e => {
+            err?.errors?.forEach(e => {
                 message.error(e.content)
             })
             break;

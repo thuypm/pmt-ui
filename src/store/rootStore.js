@@ -7,6 +7,7 @@ import exerciseStore from './exerciseStore';
 import groupStore from './groupStore';
 import meetingStore from './meetingStore';
 import notificaitonStore from './notificaitonStore';
+import postStore from './postStore';
 import userStore from './userStore'
 
 
@@ -19,7 +20,8 @@ const store = new Vuex.Store({
         group: groupStore,
         meeting: meetingStore,
         noti: notificaitonStore,
-        exercise: exerciseStore
+        exercise: exerciseStore,
+        post: postStore
     }
 }) 
 

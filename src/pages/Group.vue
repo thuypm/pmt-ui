@@ -1,11 +1,13 @@
  
 <template>
   <div>
-    <chat-meeting :roomId="roomId"/>
+    <chat-meeting :roomId="roomId" />
     <div class="post-header">
       <div class="title">Bài đăng</div>
       <div class="">
-        <a-button type="primary" icon="video-camera" @click="goToMeetingPage">Tham gia</a-button>
+        <a-button type="primary" icon="video-camera" @click="goToMeetingPage"
+          >Tham gia</a-button
+        >
         <span> <a-icon class="action-post-icon setting" type="setting" /></span>
       </div>
     </div>
@@ -19,70 +21,91 @@
       >
         <a-list-item slot="renderItem" key="item.title" slot-scope="item">
           <post-item :item="item" :listData="listData" />
+          <!-- <post-comment :item="item" :listData="listData" /> -->
           <div class="list-item-footer">
-            <span>
+            <div>
               <input placeholder="Nhập câu trả lời" />
-              <span style="float: right"
-                ><a-icon type="right-square"></a-icon
-              ></span>
-              <a-icon type="enter" />
-              Trả lời
-            </span>
+              <div class="function-btn">
+                <a-icon type="enter" />
+                Trả lời
+              </div>
+            </div>
           </div>
         </a-list-item>
       </a-list>
     </div>
-    <div class="post-form">
-      <textarea placeholder="Tạo bài viết mới" />
-      <div class="post-form-action">
-        <span style="float: right">
-          <a-icon class="action-post-icon" type="right-square"> </a-icon>
-        </span>
-        <span style="display: flex">
-          <a-upload
-            style="margin-right: 10px"
-            name="logo"
-            action="/upload.do"
-            list-type="picture"
-          >
-            <a-icon class="action-post-icon" type="paper-clip" />
-          </a-upload>
-          <a-upload name="logo" action="/upload.do" list-type="picture">
-            <a-icon class="action-post-icon" type="file-image" />
-          </a-upload>
-        </span>
-      </div>
-    </div>
+    <post-form-submit :socket="socketPost"/>
   </div>
 </template>
 <script>
+import { mapState } from "vuex";
+import PostFormSubmit from "./Group/PostFormSubmit.vue";
 import PostItem from "./Group/PostItem.vue";
+import PostComment from "./Group/PostComment.vue";
+import {generateHeader} from '../services/api'
 import ChatMeeting from "./Meeting/ChatMeeting.vue";
-
+import io from "socket.io-client";
+let socket = io.connect(process.env.VUE_APP_HOST_WS_POST,{
+      query: generateHeader()
+    });
 export default {
-  components: { ChatMeeting, PostItem },
+  components: { ChatMeeting, PostItem, PostFormSubmit, PostComment },
   data() {
     return {
-      listData:[],
       roomId: this.$route.params.id,
+      fileSend: null,
+      uploading: false,
       loading: false,
       loadingMore: false,
+      content: "",
       showLoadingMore: true,
-      actions: [{ type: "check", text: "Đã đọc" }],
+      socketPost: socket,
     };
   },
-  methods:{
-    goToMeetingPage()
-    {
-      this.$router.push('/meeting/'+ this.roomId)
-    }
-  }
+  computed: {
+    ...mapState({
+      listData: (state) => state.post.listData,
+    }),
+  },
+  created() {
+    this.socketPost.emit("join-room", this.roomId);
+    this.socketPost.on("get-all-post", (data) => {
+      this.$store.commit("post/setListData", data);
+    });
+      this.socketPost.on("new-post", (data) => {
+      this.$store.commit("post/addNewPost", data);
+    });
+    this.$store.commit("post/setSelectedGroupId", this.roomId);
+    // this.$store.dispatch("post/fetchAllData");
+  },
+  methods: {
+    goToMeetingPage() {
+      this.$router.push("/meeting/" + this.roomId);
+    },
+  },
 };
 </script>
 
 <style scoped>
 .setting {
   margin-left: 20px;
+}
+.post-form {
+  position: absolute;
+  background: rgb(243, 242, 241);
+  bottom: 0;
+  width: calc(100% - 300px);
+  padding: 16px 48px 8px 78px;
+}
+input,
+textarea {
+  position: relative;
+  width: 100%;
+  padding: 8px 16px 8px 16px;
+  border: none;
+  outline: none;
+  border-bottom: 2px solid #1890ff;
+  border-top: 1px solid #e8e8e8;
 }
 .title {
   font-size: 18px;
@@ -98,27 +121,11 @@ export default {
   top: 0;
   background: #fff;
 }
-.post-form {
-  position: absolute;
-  background: rgb(243, 242, 241);
-  bottom: 0;
-  width: calc(100% - 300px);
-  padding: 16px 48px 8px 78px;
-}
+
 p {
   margin-bottom: 2px;
 }
 
-input,
-textarea {
-  position: relative;
-  width: 100%;
-  padding: 8px 16px 8px 16px;
-  border: none;
-  outline: none;
-  border-bottom: 2px solid #1890ff;
-  border-top: 1px solid #e8e8e8;
-}
 .list-item-footer {
   margin-left: 48px;
 }

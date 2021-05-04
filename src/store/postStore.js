@@ -2,52 +2,19 @@ import { postRequest, getRequest, putRequest, deleteRequest, patchRequest } from
 import router from '../router/index'
 import { TIME_FORMAT } from "../utils/constants";
 import moment from "moment";
-const defaultData = {
-    _id: null,
-    name: '',
-    description: '',
-    owner: null,
-    time_expired: null,
-    date_expired: null
-}
+
 
 export default {
     namespaced: true,
     state: {
         loading: false,
         spinning: false,
-        visibleModal: false,
-        visibleModalSubmit: false,
-        visibleModalEvaluate: false,
         selectedGroupId: null,
-        formDataEvaluate: {
-
-        },
-        listExercise: [],
+        listData: [],
         errorList: [],
         selectedItem: null,
-        selectedSubmit: {
-
-        },
-        formData: {
-            _id: null,
-            name: '',
-            description: '',
-            owner: '',
-            time_expired: null,
-            date_expired: null,
-        }
     },
     mutations: {
-        setVisibleModal(state, value) {
-            state.visibleModal = value;
-        },
-        setVisibleModalEvaluate(state, value) {
-            state.visibleModalEvaluate = value;
-        },
-        setSelectedSubmit(state, value) {
-            state.selectedSubmit = value;
-        },
         setSelectedGroupId(state, action) {
             state.selectedGroupId = action
         },
@@ -57,31 +24,16 @@ export default {
         setLoading(state, value) {
             state.loading = value
         },
-        setVisibleModalSubmit(state, value) {
-            state.visibleModalSubmit = value;
-        },
-        setFormData(state, value) {
-            state.formData = {
-                ...state.formData,
-                ...value
-            }
-        },
         setSelectedItem(state, value) {
             state.selectedItem = value
         },
-        setListExercise(state, value) {
-            state.listExercise = value;
+        setListData(state, value) {
+            state.listData = value;
         },
-        setFormEvaluateData(state, data) {
-            state.formDataEvaluate = {
-                ...state.formDataEvaluate,
-                ...data
-            }
-        },
-        resetFormData(state, )
-        {
-                state.formData = defaultData;
-        },
+        addNewPost(state, value) {
+            let newData = [...state.listData, value]
+            state.listData = newData
+        }
     },
     actions: {
         async fetchOneItem({ commit, state }, id) {
@@ -95,41 +47,24 @@ export default {
                 commit('setSelectedItem', response);
             }
         },
-        async fetchAllExercise({ commit, state },) {
-            let response = await getRequest('exercise', {
+        async fetchAllData({ commit, state },) {
+            let response = await getRequest('post', {
                 group_id: state.selectedGroupId
             }).catch(err => {
                 commit('setSpinning', false);
             })
             if (response) {
                 commit('setSpinning', false);
-                commit('setListExercise', response);
+                commit('setListData', response);
             }
         },
-        async submitUpload({ commit, dispatch, state }, formData) {
-            let result = await patchRequest('exercise/submit/' + state.selectedItem?._id, formData)
-                .catch(err => {
-                    this._vm.$message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
-                    commit('setLoading', false)
-                })
-            if (result) {
-                commit('setLoading', false);
-                commit('setVisibleModalSubmit', false);
-                dispatch('fetchOneItem', state.selectedItem._id);
-                this._vm.$message.success("Thành công");
-            }
-        },
-        async submitCreateExercise({ commit, dispatch, state }, group_id) {
-            let timeString = state.formData.time_expired?.format(TIME_FORMAT.HOUR_ONLY) + ',' + state.formData.date_expired?.format(TIME_FORMAT.DATE_ONLY);
-            let convertData = {
-                id: state.formData._id,
-                group_id: group_id,
-                name: state.formData.name,
-                description: state.formData.description,
-                deadline: moment(timeString, TIME_FORMAT.SHORT_FULL_TIME).valueOf()
-            }
+        async submitCreatePost({ commit, dispatch, state }, data) {
+            let formData = new FormData();
+            formData.append('file', data?.file);
+            formData.append('content', data?.content);
+            formData.append('group_id', data?.group_id);
             commit("setLoading", true);
-            let result = await postRequest('exercise/', convertData)
+            let result = await postRequest('post/', formData)
                 .catch(err => {
                     this._vm.$message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
                     commit('setLoading', false)
@@ -137,8 +72,7 @@ export default {
             if (result) {
                 commit('setLoading', false);
                 commit('setVisibleModal', false);
-                dispatch('fetchAllExercise');
-                this._vm.$message.success("Thành công");
+                dispatch('fetchAllData');
             }
         },
         async submitEditExercise({ commit, dispatch, state }, group_id) {
@@ -151,7 +85,7 @@ export default {
                 deadline: moment(timeString, TIME_FORMAT.SHORT_FULL_TIME).valueOf()
             }
             commit("setLoading", true);
-            let result = await putRequest('exercise/'+ state.selectedItem._id, convertData)
+            let result = await putRequest('exercise/' + state.selectedItem._id, convertData)
                 .catch(err => {
                     this._vm.$message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
                     commit('setLoading', false)
@@ -181,8 +115,7 @@ export default {
                 this._vm.$message.success("Thành công");
             }
         },
-        async deleteExercise ({ commit, dispatch, state })
-        {
+        async deleteExercise({ commit, dispatch, state }) {
             let result = await deleteRequest('exercise/' + state.selectedItem._id)
                 .catch(err => {
                     this._vm.$message.error("Có lỗi xảy ra, vui lòng thử lại sau!");

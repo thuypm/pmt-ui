@@ -16,6 +16,10 @@ export default {
 <style>
 #App{
 }
+.function-btn :hover {
+  cursor: pointer;
+  color: #1890ff;
+}
 .flex{
   display: flex;
 }

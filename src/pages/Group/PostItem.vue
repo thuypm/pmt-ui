@@ -1,37 +1,67 @@
 <template>
-    <div class="post-pane flex">
-      <div class="avatar">
-        <a-avatar size="large" slot="avatar" :src="item.avatar" />
-      </div>
-      <div class="post-content">
-        <p class="user-name">{{ item.title }}</p>
-        <p>{{ item.content }}</p>
-        <a-list :data-source="listData">
-          <a-list-item
-            class="comment-li"
-            slot="renderItem"
-            slot-scope="item"
-          >
-            <div class="flex">
-              <div class="avatar">
-                <a-avatar size="small" slot="avatar" :src="item.avatar" />
-              </div>
-              <div>
-                <p class="user-name">{{ item.title }}</p>
-                <p>{{ item.content }}</p>
-              </div>
-            </div>
-          </a-list-item>
-        </a-list>
-      </div>
+  <div class="post-pane flex">
+    <div class="avatar">
+      <a-avatar size="large" slot="avatar" :src="item.avatar" />
     </div>
+    <div class="post-content">
+      <div style="padding-bottom: 16px; margin-bottom: 8px">
+        <div class="flex">
+          <p class="user-name">{{ item.owner.username }}</p>
+          <span class="post-time">
+            {{ item.time | shortTime }}
+          </span>
+        </div>
+        <div v-if="item.file_type == 'data:image'" class="msg-content">
+          <a :href="hostResoucre + item.filePath" target="_blank">
+            <img
+              :src="hostResoucre + item.filePath"
+              style="max-width: 160px"
+              alt
+            />
+          </a>
+        </div>
+        <p>{{ item.content }}</p>
+      </div>
+
+      <a-list
+        v-if="item.list_comment && item.list_comment.length"
+        :data-source="item.list_comment"
+      >
+        <a-list-item class="comment-li" slot="renderItem" slot-scope="cmt">
+          <div class="flex">
+            <div class="avatar">
+              <a-avatar size="small" slot="avatar" :src="cmt.avatar" />
+            </div>
+            <div>
+              <p class="user-name">{{ cmt.owner.username }}</p>
+              <p>{{ cmt.content }}</p>
+            </div>
+          </div>
+        </a-list-item>
+      </a-list>
+    </div>
+  </div>
 </template>
 <script>
+import { shortTime } from "../../utils/filters";
 export default {
-    props:['item', "listData"]
-}
+  props: ["item", "listData"],
+  data() {
+    return {
+      hostResoucre: process.env.VUE_APP_HOST_RESOURCE,
+    };
+  },
+  filters: {
+    shortTime: shortTime,
+  },
+};
 </script>
 <style scoped>
+.post-time {
+  font-size: 12px;
+  line-height: 24px;
+  margin-left: 16px;
+}
 .post-form {
   position: absolute;
   background: rgb(243, 242, 241);
@@ -59,6 +89,7 @@ textarea {
 }
 
 .user-name {
+  font-size: 16px;
   font-weight: 500;
 }
 .post-content {

@@ -17,11 +17,14 @@ export default {
 #App{
 }
 .function-btn :hover {
-  cursor: pointer;
+  cursor: pointer ;
   color: #1890ff;
 }
 .flex{
   display: flex;
+}
+.justifi-center{
+  justify-content: center;
 }
 .justifi-space-beetwen{
   justify-content: space-between;

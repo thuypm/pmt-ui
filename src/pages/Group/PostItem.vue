@@ -1,17 +1,17 @@
 <template>
   <div class="post-pane flex">
     <div class="avatar">
-      <a-avatar size="large" slot="avatar" :src="item.avatar" />
+      <a-avatar size="large" slot="avatar" :src="hostResoucre + '/user/' + item.owner.username + '.jpg'" />
     </div>
     <div class="post-content">
       <div style="padding-bottom: 16px; margin-bottom: 8px">
-        <div class="flex">
+        <div>
           <p class="user-name">{{ item.owner.username }}</p>
-          <span class="post-time">
+          <div class="post-time">
             {{ item.time | shortTime }}
-          </span>
+          </div>
         </div>
-        <div v-if="item.file_type == 'data:image'" class="msg-content">
+        <div v-if="item.file_type === 'data:image'" class="msg-content">
           <a :href="hostResoucre + item.filePath" target="_blank">
             <img
               :src="hostResoucre + item.filePath"
@@ -20,9 +20,17 @@
             />
           </a>
         </div>
-        <p>{{ item.content }}</p>
+        <a
+          :href="hostResoucre + item.filePath"
+          v-else-if="item.file_type"
+          target="_blank"
+        >
+          <a-icon type="file"></a-icon>
+          {{ item.file_name | trimNameFile}}
+        </a>
+        <p v-else>{{ item.content }}</p>
       </div>
-
+      <hr v-if="item.list_comment.length" />
       <a-list
         v-if="item.list_comment && item.list_comment.length"
         :data-source="item.list_comment"
@@ -30,10 +38,15 @@
         <a-list-item class="comment-li" slot="renderItem" slot-scope="cmt">
           <div class="flex">
             <div class="avatar">
-              <a-avatar size="small" slot="avatar" :src="cmt.avatar" />
+              <a-avatar size="small" slot="avatar" :src="hostResoucre + '/user/' + cmt.username + '.jpg'" />
             </div>
             <div>
-              <p class="user-name">{{ cmt.owner.username }}</p>
+              <p class="user-name">
+                {{ cmt.username }}
+              </p>
+              <span class="post-time">
+                {{ cmt.time | shortTime }}
+              </span>
               <p>{{ cmt.content }}</p>
             </div>
           </div>
@@ -43,7 +56,7 @@
   </div>
 </template>
 <script>
-import { shortTime } from "../../utils/filters";
+import { shortTime, trimNameFile } from "../../utils/filters";
 export default {
   props: ["item", "listData"],
   data() {
@@ -53,14 +66,13 @@ export default {
   },
   filters: {
     shortTime: shortTime,
+    trimNameFile: trimNameFile
   },
 };
 </script>
 <style scoped>
 .post-time {
-  font-size: 12px;
-  line-height: 24px;
-  margin-left: 16px;
+  font-size: 10px;
 }
 .post-form {
   position: absolute;

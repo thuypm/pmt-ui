@@ -14,7 +14,7 @@
           }}</a>
           <a-avatar
             slot="avatar"
-            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+            src="group_img.png"
           />
         </a-list-item-meta>
         <!-- <div v-if="!item.status"><a-badge status="success" text="Mới" /></div> -->

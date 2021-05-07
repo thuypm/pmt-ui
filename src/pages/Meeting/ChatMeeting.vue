@@ -19,18 +19,24 @@ import ChatBody from "./ChatComponent/ChatBody.vue";
 import ChatFooter from "./ChatComponent/ChatFooter.vue";
 import io from "socket.io-client";
 
-var socket = io.connect(process.env.VUE_APP_HOST_WS_CHAT);
 export default {
   props: ["roomId"],
   components: { ChatFooter, ChatBody },
   data() {
     return {
-      chatSocket: socket,
+      chatSocket: null,
       username: localStorage.username,
     };
   },
+  beforeDestroy() {
+    this.chatSocket.disconnect();
+  },
   created() {
+    this.chatSocket = io.connect(process.env.VUE_APP_HOST_WS_CHAT);
     this.chatSocket.emit("join-room", this.roomId);
+    this.chatSocket.on("load-all-user", (listUser) => {
+      this.$store.commit("meeting/setListUser", listUser);
+    });
   },
 };
 </script>
@@ -39,7 +45,7 @@ export default {
   width: 300px;
   float: right;
   height: 100%;
-  transition: width 1s;
+  /* transition: width 1s; */
 }
 .chat-body {
   height: calc(100vh - 96px);

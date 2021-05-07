@@ -57,6 +57,7 @@ export default {
       content: "",
     };
   },
+
   methods: {
     resetForm(){
       this.fileSend = null;

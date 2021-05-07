@@ -1,12 +1,18 @@
 <template>
-  <div class="chat-body" id="message-box-list">
+  <div class="chat-body" id="message-box-list" ref="listChatMessage">
     <a-skeleton active v-if="spinning" />
-    <div v-else v-for="(message, index) in listMessage" :key="index">
+    <div
+      v-else-if="listMessage.length"
+      v-for="(message, index) in listMessage"
+      :key="index"
+    >
       <div v-if="message.sender !== username" class="msg-pane receive-message">
         <div class="msg">
           <a-avatar
             class="receive-avatar"
-            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+            icon="user"
+            :src="hostResoucre + '/user/' + message.sender + '.jpg'"
+            style="margin-right: 4px"
           />
           <div class="msg-receive-container">
             <div v-if="message.type == 'data:image'" class="msg-content">
@@ -74,26 +80,32 @@
           </div>
           <a-avatar
             class="send-avatar"
-            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+            icon="user"
+            :src="hostResoucre + '/user/' + message.sender + '.jpg'"
+            style="margin-left: 4px"
           />
         </div>
       </div>
     </div>
+    <a-empty v-else :image="simpleImage" />
   </div>
 </template>
 <script>
 import moment from "moment";
 import { TIME_FORMAT } from "../../../utils/constants";
 import { trimNameFile } from "../../../utils/filters";
-
+import { Empty } from "ant-design-vue";
 export default {
   props: ["chatSocket", "username"],
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
+  },
   data() {
     return {
       hostResoucre: process.env.VUE_APP_HOST_RESOURCE,
       listMessage: [],
       page: 0,
-      spinning: true
+      spinning: true,
     };
   },
   filters: {
@@ -102,21 +114,37 @@ export default {
     },
     trimNameFile: trimNameFile,
   },
+  watch: {
+    listMessage: {
+      handler: function (value) {
+        this.$nextTick(function () {
+          this.$refs.listChatMessage.scrollTop = this.$refs.listChatMessage.scrollHeight;
+        });
+      },
+    },
+  },
+  mounted() {
+    this.$refs.listChatMessage.scrollIntoView({ behavior: "smooth" });
+  },
   created() {
     this.chatSocket.on("load-all-message", (data) => {
       var messageBox = document.getElementById("message-box-list");
       var tmp = messageBox.scrollHeight;
+      this.spinning = false;
       if (data.length) {
         this.listMessage = data.concat(this.listMessage);
-        this.spinning = false
-        if (this.page == 0)
-          this.$nextTick(function () {
-            messageBox.scrollTop = messageBox.scrollHeight;
-          });
-        else
-          this.$nextTick(function () {
-            messageBox.scrollTop = messageBox.scrollHeight - tmp;
-          });
+
+        // this.$nextTick(() => {
+        //   this.$refs.listChatMessage.scrollTop = this.$refs.listChatMessage.scrollHeight;
+        // });
+        // if (this.page == 0)
+        //   this.$nextTick(function () {
+        //     messageBox.scrollTop = messageBox.scrollHeight;
+        //   });
+        // else
+        //   this.$nextTick(function () {
+        //     messageBox.scrollTop = messageBox.scrollHeight - tmp;
+        //   });
       }
     });
     this.chatSocket.on("receive-message", (data) => {

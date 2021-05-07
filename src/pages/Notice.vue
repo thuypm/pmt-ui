@@ -21,10 +21,10 @@
           <a @click="() => handleRedirect(item)" slot="title">{{
             item.content
           }}</a>
-          <a-avatar
+          <!-- <a-avatar
             slot="avatar"
             src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-          />
+          /> -->
         </a-list-item-meta>
         <div v-if="!item.status"><a-badge status="success" text="Mới" /></div>
       </a-list-item>

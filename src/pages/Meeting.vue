@@ -1,15 +1,17 @@
 <template>
   <div>
     <chat-meeting
-      :class="[tab == 'CHAT_TAB' ? 'chat-meeting' : 'chat-meeting-hide']"
+      :class="[tab === 'CHAT_TAB' ? 'chat-meeting' : 'chat-meeting-hide']"
       :roomId="roomId"
     />
-    <task-manager
-      @show-right-tab="(tab) => showTab(tab)"
+    <list-member
+      v-if="tab === 'LIST_USER'"
+      :roomId="roomId"
     />
+    <task-manager @show-right-tab="(tab) => showTab(tab)" />
     <stream-screen
       :class="tab ? '.stream-screen' : '.stream-screen-full'"
-      :roomId = roomId
+      :roomId="roomId"
     />
   </div>
 </template>
@@ -17,11 +19,10 @@
 import ChatMeeting from "./Meeting/ChatMeeting.vue";
 import StreamScreen from "./Meeting/StreamScreen.vue";
 import TaskManager from "./Meeting/TaskManager.vue";
-
-import SimplePeer from "simple-peer";
+import ListMember from "./Meeting/ListMember.vue";
 
 export default {
-  components: { ChatMeeting, StreamScreen, TaskManager },
+  components: { ChatMeeting, StreamScreen, TaskManager, ListMember },
   data() {
     return {
       tab: null,
@@ -31,7 +32,6 @@ export default {
 
   methods: {
     showTab(tab) {
-      // console.log(tab);
       if (this.tab === tab) this.tab = null;
       else this.tab = tab;
     },
@@ -39,6 +39,12 @@ export default {
 };
 </script>
 <style scoped>
+.chat-bar {
+  width: 300px;
+  float: right;
+  height: 100%;
+  /* transition: width 1s; */
+}
 .chat-meeting {
   width: 300px;
 }

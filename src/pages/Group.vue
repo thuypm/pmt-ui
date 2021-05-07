@@ -11,7 +11,7 @@
         <span> <a-icon class="action-post-icon setting" type="setting" /></span>
       </div>
     </div>
-    <div class="list-post">
+    <div class="list-post" ref="listPostPane">
       <a-list
         item-layout="vertical"
         size="large"
@@ -21,8 +21,8 @@
       >
         <a-list-item slot="renderItem" key="item.title" slot-scope="item">
           <post-item :item="item" :listData="listData" />
-          <!-- <post-comment :item="item" :listData="listData" /> -->
-          <div class="list-item-footer">
+          <post-comment :item="item" :group_id="roomId" :socket="socketPost" />
+          <!-- <div class="list-item-footer">
             <div>
               <input placeholder="Nhập câu trả lời" />
               <div class="function-btn">
@@ -30,11 +30,11 @@
                 Trả lời
               </div>
             </div>
-          </div>
+          </div> -->
         </a-list-item>
       </a-list>
     </div>
-    <post-form-submit :socket="socketPost"/>
+    <post-form-submit :socket="socketPost" />
   </div>
 </template>
 <script>
@@ -42,12 +42,12 @@ import { mapState } from "vuex";
 import PostFormSubmit from "./Group/PostFormSubmit.vue";
 import PostItem from "./Group/PostItem.vue";
 import PostComment from "./Group/PostComment.vue";
-import {generateHeader} from '../services/api'
+import { generateHeader } from "../services/api";
 import ChatMeeting from "./Meeting/ChatMeeting.vue";
 import io from "socket.io-client";
-let socket = io.connect(process.env.VUE_APP_HOST_WS_POST,{
-      query: generateHeader()
-    });
+// let socket = io.connect(process.env.VUE_APP_HOST_WS_POST, {
+//   query: generateHeader(),
+// });
 export default {
   components: { ChatMeeting, PostItem, PostFormSubmit, PostComment },
   data() {
@@ -59,8 +59,20 @@ export default {
       loadingMore: false,
       content: "",
       showLoadingMore: true,
-      socketPost: socket,
+      socketPost: null,
     };
+  },
+  beforeDestroy() {
+    this.socketPost.disconnect();
+  },
+  watch: {
+    listData: {
+      handler: function () {
+        this.$nextTick(function () {
+          this.$refs.listPostPane.scrollTop = this.$refs.listPostPane.scrollHeight;
+        });
+      },
+    },
   },
   computed: {
     ...mapState({
@@ -68,12 +80,18 @@ export default {
     }),
   },
   created() {
+    this.socketPost = io.connect(process.env.VUE_APP_HOST_WS_POST, {
+      query: generateHeader(),
+    });
     this.socketPost.emit("join-room", this.roomId);
     this.socketPost.on("get-all-post", (data) => {
       this.$store.commit("post/setListData", data);
     });
-      this.socketPost.on("new-post", (data) => {
+    this.socketPost.on("new-post", (data) => {
       this.$store.commit("post/addNewPost", data);
+    });
+    this.socketPost.on("new-comment", (data) => {
+      this.$store.commit("post/addNewComment", data);
     });
     this.$store.commit("post/setSelectedGroupId", this.roomId);
     // this.$store.dispatch("post/fetchAllData");

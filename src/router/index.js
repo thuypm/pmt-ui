@@ -26,12 +26,12 @@ const router = new Router({
       path: '/',
       component: PrivateLayout,
       redirect: "/all-group",
-      beforeEnter: (to, from, next) => {
-        if (localStorage.token && localStorage.username)
-          return next();
-        else
-          next('/signin')
-      },
+        // beforeEnter: (to, from, next) => {
+        //   if (localStorage.token && localStorage.username)
+        //     return next();
+        //   else
+        //     next('/signin')
+        // },
       children:
         [
           //   {
@@ -86,12 +86,25 @@ const router = new Router({
     {
       path: '/signin',
       name: 'signin',
-      component: Signin
+      component: Signin,
+      beforeEnter: (to, from, next) => {
+        if (!localStorage.token || !localStorage.username)
+          return next();
+        else
+          next('/')
+      },
     },
     {
       path: '/signup',
       name: 'signup',
       component: Signup
+      ,
+      beforeEnter: (to, from, next) => {
+        if (!localStorage.token || !localStorage.username)
+          return next();
+        else
+          next('/')
+      },
     },
     {
       path: '*',
@@ -99,7 +112,15 @@ const router = new Router({
       component: Error404
     },
   ],
-
+})
+router.beforeEach((to, from, next) => {
+  if (to.fullPath !== "/signin" && to.fullPath !== 'signup')
+    if (localStorage.token && localStorage.username)
+      return next();
+    else
+      return next('/signin')
+    else
+    return next()
 })
 // router.beforeEach((to, from, next) => {
 //   switch (to.fullPath) {

@@ -3,7 +3,7 @@
     <img
       slot="cover"
       alt="example"
-      src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
+      src="group_img.png"
     />
     <template slot="actions" class="ant-card-actions">
       <a-tooltip

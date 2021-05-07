@@ -18,6 +18,7 @@ export default {
             camera: false,
             micro: false
         },
+        listUser: [],
         listClient: [],
         peer: [],
     },
@@ -33,6 +34,9 @@ export default {
         },
         setLoading(state, value) {
             state.loading = value
+        },
+        setListUser(state, value) {
+            state.listUser = value
         },
         stopVideoUser(state, value) {
             if (state.videoUser)

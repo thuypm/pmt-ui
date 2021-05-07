@@ -30,6 +30,10 @@ export default {
         setListData(state, value) {
             state.listData = value;
         },
+        addNewComment(state, value) {
+            let postFind = state.listData.find(e => e._id === value.post_id);
+            postFind.list_comment.push(value.cmt);
+        },
         addNewPost(state, value) {
             let newData = [...state.listData, value]
             state.listData = newData

@@ -1,13 +1,29 @@
 <template>
   <div>
-    <img class="img-screen" src="/meeting_icon.gif" />
+    <img
+      :class="dataSharing ? 'img-sharing' : 'img-screen'"
+      v-bind:src="dataSharing ? dataSharing : '/meeting_icon.gif'"
+    />
     <!-- <a-avatar shape="square" :size="64" icon="user" /> -->
   </div>
 </template>
 <script>
-export default {};
+import { mapState } from "vuex";
+export default {
+  computed: {
+    ...mapState({
+      dataSharing: (state) => state.meeting.dataSharing,
+    }),
+  },
+};
 </script>
 <style  scoped>
+.img-sharing {
+  width: 100%;
+  /* height: 100%; */
+  max-height: calc(100vh - 170px);
+  object-fit: contain;
+}
 .img-screen {
   /* width:  calc(100% - 300px);  */
   border-radius: 50%;

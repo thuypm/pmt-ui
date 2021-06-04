@@ -6,6 +6,7 @@ import rootStore from './store/rootStore';
 import Antd from 'ant-design-vue';
 import Unicon from 'vue-unicons'
 import {
+  uniRecordAudio,
   uniVideo, uniVideoSlash,
   uniMicrophone, uniMicrophoneSlash,
   uniDesktop, uniDesktopSlash,
@@ -15,6 +16,7 @@ import {
 import Noti from './utils/Noti';
 
 Unicon.add([
+  uniRecordAudio,
   uniVideo, uniVideoSlash,
   uniMicrophone, uniMicrophoneSlash,
   uniDesktop, uniDesktopSlash,

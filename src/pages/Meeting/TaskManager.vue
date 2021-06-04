@@ -1,7 +1,7 @@
 <template>
   <div class="task-manager" :style="{ right: activeTab ? '150px' : '0' }">
-    <div class="meeting-function-button">
-      <unicon name="video" fill="rgba(0, 0, 0, 0.65)"></unicon>
+    <div class="meeting-function-view">
+      <unicon name="record-audio" fill="green"></unicon>
     </div>
     <div
       :class="{
@@ -20,15 +20,18 @@
         'meeting-function-button': true,
         active: microphone,
       }"
-       @click="() => turnOnDevice(false, true)"
+      @click="() => turnOnDevice(false, true)"
     >
       <unicon
         :name="microphone ? 'microphone' : 'microphone-slash'"
         fill="rgba(0, 0, 0, 0.65)"
       ></unicon>
     </div>
-    <div class="meeting-function-button">
-      <unicon name="desktop" fill="rgba(0, 0, 0, 0.65)"></unicon>
+    <div :class="dataSharing? 'meeting-function-view':'meeting-function-button'" @click="handleShareScreen">
+      <unicon
+        :name="dataSharing ? 'desktop-slash' : 'desktop'"
+        :fill="dataSharing ?'rgba(0, 0, 0, 0.2)':'rgba(0, 0, 0, 0.65)'"
+      ></unicon>
     </div>
     <div
       :class="{
@@ -48,14 +51,18 @@
     >
       <unicon name="users-alt" fill="rgba(0, 0, 0, 0.65)"></unicon>
     </div>
-    <div class="meeting-function-button" style="background: red">
+    <div
+      class="meeting-function-button"
+      style="background: red"
+      @click="() => $router.push('/')"
+    >
       <unicon name="phone" fill="white"></unicon>
     </div>
     <div></div>
   </div>
 </template>
 <script>
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 export default {
   data() {
     return {
@@ -64,13 +71,19 @@ export default {
       // microphone: false,
     };
   },
-  computed:{
+  computed: {
     ...mapState({
-      camera: state => state.meeting.mediaDevice.camera,
-      microphone: state => state.meeting.mediaDevice.micro,
-    })
+      camera: (state) => state.meeting.mediaDevice.camera,
+      microphone: (state) => state.meeting.mediaDevice.micro,
+      isSharing: (state) => state.meeting.isSharing,
+      dataSharing: (state) => state.meeting.dataSharing,
+    }),
   },
   methods: {
+    handleShareScreen() {
+      if(!this.dataSharing)
+        this.$store.commit("meeting/setShareScreen", !this.isSharing)
+    },
     turnOnDevice(editCamera, editMicro) {
       if (editCamera)
         this.$store.commit("meeting/setMediaDevice", {
@@ -93,6 +106,11 @@ export default {
 </script>
 <style scoped>
 .meeting-function-button {
+  background: #fff;
+  padding: 6px 24px;
+  /* font-size: 16px; */
+}
+.meeting-function-view {
   background: #fff;
   padding: 6px 24px;
   /* font-size: 16px; */

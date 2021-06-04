@@ -16,7 +16,11 @@
       </div>
 
       <div class="img-only" v-else>
-        <a-avatar icon="user" :size="60"></a-avatar>
+        <a-avatar
+          icon="user"
+          :size="60"
+          :src="hostResoucre + '/user/' + username + '.jpg'"
+        ></a-avatar>
         <p class="username">{{ username }}</p>
       </div>
     </div>
@@ -36,7 +40,11 @@
       </div>
 
       <div class="img-only" v-else>
-        <a-avatar icon="user" :size="60"></a-avatar>
+        <a-avatar
+          icon="user"
+          :size="60"
+          :src="hostResoucre + '/user/' + client.username + '.jpg'"
+        ></a-avatar>
         <p class="username">{{ client.username }}</p>
       </div>
     </div>
@@ -53,6 +61,7 @@ export default {
   },
   data() {
     return {
+      hostResoucre: process.env.VUE_APP_HOST_RESOURCE,
       username: localStorage.username,
     };
   },
@@ -100,8 +109,8 @@ export default {
 }
 .username-video > p {
   background: rgba(0, 0, 0, 0.5);
-  padding: 2px 16px;  
-  text-align:  center;
+  padding: 2px 16px;
+  text-align: center;
   border-radius: 3px;
   margin-bottom: 0;
 }

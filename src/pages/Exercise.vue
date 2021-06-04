@@ -6,13 +6,20 @@
     <a-row>
       <a-col :xl="6" :lg="8">
         <a-card title="Danh sách bài tập" :bordered="false">
-          <a-button type="button" @click="() =>
-            {
-           $store.commit('exercise/resetFormData');
-           setVisibleModal(!visibleModal)
-            } ">
-            <a-icon type="plus"></a-icon>
-          </a-button>
+          <div slot="extra">
+            <a-button
+              type="button"
+              @click="
+                () => {
+                  $store.commit('exercise/resetFormData');
+                  setVisibleModal(!visibleModal);
+                }
+              "
+            >
+              <a-icon type="plus"></a-icon>
+            </a-button>
+          </div>
+
           <a-collapse
             :bordered="false"
             class="list-exercise list-exercise-pane"
@@ -35,6 +42,9 @@
       </a-col>
       <a-col :xl="18" :lg="16">
         <a-card title="Chi tiết" :bordered="false" :loading="spinning">
+          <div slot="extra" style="min-height: 32px">
+
+          </div>
           <div v-if="selectedItem != null" class="list-exercise">
             <exercise-header />
             <list-submit />
@@ -109,9 +119,16 @@ export default {
 .ant-card-body {
   padding: 0px 0px 0px 0px !important ;
 }
+.ant-card-head-title {
+  min-height: 64px  !important;
+}
+.ant-collapse{
+  background: transparent;
+}
 /* .list-exercise-pane {
   width: 350px;
 } */
+
 .list-exercise {
   height: calc(100vh - 150px);
   overflow: auto;

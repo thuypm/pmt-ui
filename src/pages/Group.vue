@@ -84,6 +84,9 @@ export default {
       query: generateHeader(),
     });
     this.socketPost.emit("join-room", this.roomId);
+       this.socketPost.on("have-error", () => {
+      this.$router.push('/')
+    });
     this.socketPost.on("get-all-post", (data) => {
       this.$store.commit("post/setListData", data);
     });

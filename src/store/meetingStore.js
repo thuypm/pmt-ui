@@ -18,11 +18,20 @@ export default {
             camera: false,
             micro: false
         },
+        isSharing: false,
+        dataSharing: null,
         listUser: [],
         listClient: [],
         peer: [],
     },
     mutations: {
+        setShareScreen(state, value)
+        {
+            state.isSharing = value;
+        },
+        setDataScreen(state, value){
+            state.dataSharing = value;
+        },
         setVideoUser(state, videoObject) {
             state.videoUser = videoObject;
         },

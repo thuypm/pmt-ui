@@ -11,7 +11,8 @@
         }}</a>
         <a-avatar
           slot="avatar"
-          src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+          icon="user"
+          :src="hostResoucre + '/user/' + username + '.jpg'"
         />
       </a-list-item-meta>
     </a-list-item>
@@ -21,7 +22,8 @@
           <a slot="title" href="https://www.antdv.com/">{{ user.username }}</a>
           <a-avatar
             slot="avatar"
-            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+            icon="user"
+           :src="hostResoucre + '/user/' + user.username + '.jpg'"
           />
         </a-list-item-meta>
         <a-icon v-if="listClient.find(e=> e.username === user.username)" type="check" style="color: green"></a-icon>
@@ -35,6 +37,7 @@ import { mapState } from "vuex";
 export default {
   data() {
     return {
+         hostResoucre: process.env.VUE_APP_HOST_RESOURCE,
       username: localStorage.username,
       listUserView: [],
     };

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <canvas id="canvas" style="display: none"></canvas>
     <a-row
       type="flex"
       justify="space-around"
@@ -30,12 +31,13 @@ export default {
       meetingSocket: io.connect(process.env.VUE_APP_HOST_WS_MEETING),
       username: localStorage.username,
       myPeer: [],
-      yourPeer: []
+      yourPeer: [],
     };
   },
   computed: {
     ...mapState({
       mediaDevice: (state) => state.meeting.mediaDevice,
+      isSharing: (state) => state.meeting.isSharing,
     }),
   },
   watch: {
@@ -43,12 +45,57 @@ export default {
       this.handleGetDevice(value);
       return value;
     },
+    isSharing: {
+      handler: function (value) {
+        if (!value) return;
+        let captureStream = null;
+        captureStream = navigator.mediaDevices.getDisplayMedia({
+          audio: false,
+          video: true,
+          cursor: "always",
+        });
+        captureStream
+          .then((stream) => {
+            var video = document.createElement("video");
+            video.autoplay = true;
+            video.srcObject = stream;
+            var canvas = document.getElementById("canvas");
+            canvas.width = 960;
+            canvas.height = 540;
+            var context = canvas.getContext("2d");
+            context.width = canvas.width;
+            context.height = canvas.height;
+            var running = setInterval(() => {
+              context.drawImage(video, 0, 0, context.width, context.height);
+              var vid = canvas.toDataURL("image/webp");
+              this.meetingSocket.emit("share-screen", {
+                group_id: this.roomId,
+                data: vid,
+              });
+              if (!stream.active) {
+                this.meetingSocket.emit("stop-share-creen", {
+                  group_id: this.roomId,
+                });
+                clearInterval(running);
+              }
+            }, 70);
+          })
+          .catch((err) => console.log(err));
+      },
+    },
   },
   created() {
     this.meetingSocket.emit("join-room", {
       roomId: this.roomId,
       clientId: this.meetingSocket.id,
       username: this.username,
+    });
+    this.meetingSocket.on("start-share-screen", (data) => {
+      this.$store.commit("meeting/setDataScreen", data);
+    });
+    this.meetingSocket.on("stop-share-screen", (data) => {
+      this.$store.commit("meeting/setDataScreen", null);
+      this.$store.commit("meeting/setShareScreen", false);
     });
     this.meetingSocket.on("res-new-client", (data) => {
       this.$store.commit("meeting/pushNewClient", data);
@@ -103,9 +150,9 @@ export default {
         }),
         username: data.username,
       });
-      newPeer.peer.on("error", (error)=>{
+      newPeer.peer.on("error", (error) => {
         newPeer.close();
-      })
+      });
       newPeer.peer.signal(data.token);
       newPeer.peer.on("signal", (token) => {
         this.meetingSocket.emit("res-on-video", {
@@ -175,7 +222,7 @@ export default {
               });
               newPeer.peer.on("error", (error) => {
                 newPeer.close();
-              })
+              });
               newPeer.peer.on("signal", (token) => {
                 this.meetingSocket.emit("on-video", {
                   clientId: client.clientId,
@@ -188,7 +235,8 @@ export default {
             });
 
             this.$store.commit("meeting/setVideoUser", stream);
-          });
+          })
+          .catch((err) => {});
       }
     },
   },

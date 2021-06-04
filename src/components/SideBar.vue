@@ -118,7 +118,7 @@ export default {
     },
     handleLogout() {
       localStorage.clear();
-      location.reload();
+      window.location.reload();
     },
     hide() {
       this.visible = false;

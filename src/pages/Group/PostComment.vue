@@ -18,21 +18,21 @@ export default {
     };
   },
   methods: {
-      submitComment()
-      {
+    submitComment() {
+      if (this.comment.length)
         this.socket.emit("post-comment", {
           post_id: this.item?._id,
           comment: this.comment,
-          group_id: this.group_id
-        })
-        this.comment = ""
-          // this.$store.dispatch('post/submitComment', this.comment)
-      }
+          group_id: this.group_id,
+        });
+      this.comment = "";
+      // this.$store.dispatch('post/submitComment', this.comment)
+    },
   },
 };
 </script>
 <style scoped>
-.function-btn:hover{
+.function-btn:hover {
   cursor: pointer;
   color: #1890ff;
 }

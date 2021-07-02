@@ -11,6 +11,7 @@
             {{ item.time | shortTime }}
           </div>
         </div>
+          <p>{{ item.content }}</p>
         <div v-if="item.file_type === 'data:image'" class="msg-content">
           <a :href="hostResoucre + item.filePath" target="_blank">
             <img
@@ -28,7 +29,6 @@
           <a-icon type="file"></a-icon>
           {{ item.file_name | trimNameFile}}
         </a>
-        <p v-else>{{ item.content }}</p>
       </div>
       <hr v-if="item.list_comment.length" />
       <a-list
